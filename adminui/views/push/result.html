@@ -1,0 +1,60 @@
+<link href="css/bootstrap-switch.css" rel="stylesheet">
+<link href="css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+<div class="row">
+    <div class="col-sm-12" id="versionList">
+        <div class="configTitle">搜索条件：</div>
+        <div class="configExample" style="min-height: 20px; padding:10px">
+            <div class="row">
+                <div class="col-sm-2" style="display: inline">
+                    <span>查找时间段：</span>
+                </div>
+                <div class="form-group col-sm-5" style="display: inline">
+                    <div class='input-group date' id='dtFrom'>
+                        <input type='text' class="form-control" id="from"/>
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </div>
+                </div>
+                <div class="form-group col-sm-5" style="display: inline">
+                    <div class='input-group date' id='dtTo'>
+                        <input type='text' class="form-control" id="to"/>
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div style="width: 100%; text-align: right; display: block">
+                <button id="submit">搜索</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div style="padding: 10px"></div>
+<div class="row">
+    <div class="col-sm-12" id="versionDetail">
+
+        <table class="table table-striped">
+            <thead class="tbHeader">
+                <tr>
+                    <th>编号
+                    </th>
+                    <th>时间</th>
+                    <th>标题</th>                       
+                    <th>Android 终端收到数</th>
+                    <th>IOS apns 收到数</th>                        
+                    <th>IOS 终端收到数</th>                        
+                    <th>内容</th>
+                </tr>
+            </thead>
+            <tbody id="versionTbody">
+            </tbody>
+        </table>
+
+    </div>
+</div>
+<script src="js/bootstrap-switch.js"></script>
+<script src="js/moment.js"></script>
+<script src="js/bootstrap-datetimepicker.min.js"></script>
+<script src="js/push/result.js"></script>

@@ -1,0 +1,254 @@
+.contentLoader{
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-width: 1px;
+    border-style: solid;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    padding: 15px;
+    border-color: #DDDDDD;
+    background-color: #FCFCFC
+}
+
+.indexLogo{
+
+    width:220px; 
+    height:38px; 
+    margin-top:-12px
+}
+
+.indexLogoBg{
+    background-color: #1F1F1F
+}
+
+.indexHeadBar{
+    background-color: #F8F8F8
+}
+
+.indexHeadLink{
+    color:#F1F1F1
+}
+
+.indexHeadLink:hover{
+    color: #1F1F1F;
+    background-color: #F1F1F1
+}
+
+.indexToggleMenu{
+    background-color: #F1F1F1;
+    background-image: url('../img/indexBtn.png')
+}
+
+.tbHeader{
+    background-color: #5F5F5F;
+    color: #F1F1F1
+}
+
+a {
+    color: #3F3F3F    
+}
+
+a:hover{
+    color: #1F1F1F;
+    text-decoration: underline;
+}
+
+.list-group > .list-group-item{
+    color: #F1F1F1;
+    background-color: #3F3F3F
+}
+
+.list-group > .myActive {
+    color: #3F3F3F;
+    background-color: #F1F1F1;
+    border-color: #CCCCCC;
+}
+
+.configValue{
+    width:100%; 
+    min-height: 420px;
+    padding: 5px
+}
+
+.configExample{
+    width: 100%;
+    min-height: 420px;
+    border-style: solid; 
+    border-width: 1px; 
+    border-color: #CCCCCC; 
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px; 
+    padding: 5px
+}
+
+.myAlert{
+    display: none;
+    width: 100%;
+    font-size: 16px;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+.my-alert-success{
+    background-color: rgba(0,140,0,0.4);
+    color: rgba(0,102,26,1);
+    border-color:  rgba(0,102,26,0.8);
+}
+
+.my-alert-danger{
+    background-color: rgba(255,38,38,0.4);
+    color: rgba(255,0,0,1);
+    border-color: rgba(255,0,0,0.8);
+}
+
+.configTitle{
+    background-color:#5F5F5F;
+    border-top-left-radius: 5px; 
+    border-top-right-radius: 5px; 
+    font-size:14px;
+    font-weight: bold; 
+    color: #f1f1f1; 
+    padding: 12px
+}
+
+.bottomRadiusDiv{
+    padding: 10px;
+    width: 100%;
+    border-style: solid; 
+    border-width: 1px; 
+    border-color: #DDDDDD; 
+    border-top-style: none;
+    background-color: #FFFFFF; 
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    text-align: center
+}
+
+.radiusDiv{
+    padding: 10px;
+    width: 100%;
+    border-style: solid; 
+    border-width: 1px; 
+    border-color: #DDDDDD; 
+    background-color: #FFFFFF; 
+    border-radius: 5px;
+    text-align: center
+}
+
+.versionAddRow{
+    padding-top: 5px;
+    padding-bottom: 5px;
+    width: 100%
+}
+
+.versionAddBottom{
+    padding-top: 5px;
+    padding-bottom:5px;
+    text-align: center
+}
+
+.versionAddTitle{
+    min-width: 100px;
+    text-align: right;
+    display:inline-block; 
+    vertical-align: top;
+    font-size: 15px
+}
+
+.versionAddValue{
+    @extend .col-sm-8
+    min-width:300px;
+    text-align:left;    
+    display:inline-block; 
+}
+
+.versionAddText{
+    min-width:300px;
+    border-radius: 5px;
+    padding: 5px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #DDDDDD;
+}
+
+.versionAddTextArea{
+    min-width:300px;
+    max-width:350px;
+    min-height: 100px;
+    max-height: 120px;
+    border-radius: 5px;
+}
+
+.table{
+    border-radius: 5px;
+}
+
+.table :last-child{
+    border-bottom-right-radius: 5px;
+}
+
+.table :first-child{
+
+    border-top-left-radius: 5px;
+}
+
+.pushSelect{
+    min-width:300px;
+    border-radius: 5px;
+    height: 28px;
+}
+
+.pushItem{
+    padding-top: 10px;
+    display: block
+}
+
+.btn-highlight-1{
+    padding: 10px;
+    background-color: #DDDDDD;
+    border-radius: 10px;
+    font-family: 黑体;
+    font-size: 16px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #999999;
+}
+
+.btn-highlight-1:hover{
+    color:#FFFFFF;
+    background-color: #111111;
+}
+
+.login-div{
+    padding-top: 25px
+}
+
+.activity_toolbar{
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px
+}
+
+.activity_editor{
+    height: 300px; 
+    border-bottom-left-radius: 10px; 
+    border-bottom-right-radius: 10px;
+    background-color: #F1F1F1
+}
+
+.activityDispOuter{
+    padding:15px; 
+    background-color: #666666; 
+    border-radius: 10px; 
+    width: 405px; 
+    height: 697px
+}
+
+.activityDisp{
+    background-color: #FFFFFF; 
+    width: 375px; 
+    height: 667px;
+    border-radius: 0;
+    overflow-y: auto;
+}

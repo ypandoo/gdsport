@@ -1,0 +1,36 @@
+<div class="row">
+    <div class="col-sm-6">
+        <div class="configTitle">配置项值：</div>
+        <textarea id="configValue" class="configValue"></textarea>
+    </div>
+    <div class="col-sm-6">
+        <div class="configTitle">说明：</div>
+        <div class="configExample">
+            本配置为了限制每个电话号码的短信验证码申请的最小间隔和每天最大申请次数。
+            <br/><br/>
+            最小间隔单位为秒
+            <br/>
+            每天最大申请次数为次
+            <br/><br/>
+            例如：最小申请间隔为1分钟，每天最多申请20次，则配置项为
+            <br/>
+            [60,20]
+        </div>
+
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12 ">
+        <h3>
+            <div class="myAlert" id="alert">
+            </div>
+        </h3>
+        <div style="text-align: center">
+            <button id="submit">保存</button> &nbsp;&nbsp;
+            <button id="cancel">取消</button>
+        </div>
+    </div>
+    <script src="js/util.json.js"></script>
+    <script src="js/config/common.js"></script>
+    <script src="js/config/SmsConstraint.html.js"></script>
+</div>

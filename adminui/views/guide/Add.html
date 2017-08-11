@@ -1,0 +1,92 @@
+<link href="css/quill.snow.css" rel="stylesheet">
+<link href="css/quill.bubble.css" rel="stylesheet">
+<link href="css/quill.core.css" rel="stylesheet">
+<link href="css/bootstrap-switch.css" rel="stylesheet">
+<link href="css/bootstrap-multiselect.css" rel="stylesheet">
+<link href="css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+<div class="row versionAddRow">
+    <span class="col-sm-4 versionAddTitle">指南标题：</span>
+    <span class="col-sm-8 versionAddValue">
+        <input type="text" id="title" class="versionAddText"/>
+    </span>
+</div>
+
+<!-- Create the toolbar container -->
+<div id="toolbar-container" class="activity_toolbar">
+    <span class="ql-formats">
+        <select class="ql-font">
+        </select>
+        <select class="ql-size"></select>
+    </span>
+    <span class="ql-formats">
+        <button class="ql-bold"></button>
+        <button class="ql-italic"></button>
+        <button class="ql-underline"></button>
+        <button class="ql-strike"></button>
+    </span>
+    <span class="ql-formats">
+        <select class="ql-color"></select>
+        <select class="ql-background"></select>
+    </span>
+    <span class="ql-formats">
+        <button class="ql-script" value="sub"></button>
+        <button class="ql-script" value="super"></button>
+    </span>
+    <span class="ql-formats">
+        <button class="ql-header" value="1"></button>
+        <button class="ql-header" value="2"></button>
+        <button class="ql-blockquote"></button>
+        <button class="ql-code-block"></button>
+    </span>
+    <span class="ql-formats">
+        <button class="ql-list" value="ordered"></button>
+        <button class="ql-list" value="bullet"></button>
+        <button class="ql-indent" value="-1"></button>
+        <button class="ql-indent" value="+1"></button>
+    </span>
+    <span class="ql-formats">
+        <button class="ql-direction" value="rtl"></button>
+        <select class="ql-align"></select>
+    </span>
+    <span class="ql-formats">
+        <button class="ql-link"></button>
+        <button class="ql-image"></button>
+        <button class="ql-video"></button>
+        <button class="ql-formula"></button>
+    </span>
+    <span class="ql-formats">
+        <button class="ql-clean"></button>
+    </span>
+</div>
+
+<!-- Create the editor container -->
+<div id="editor">
+
+</div>
+<div id="alert" class="myAlert" style="padding-top: 10px; padding-bottom: 10px;
+     text-align: right; width: 100%"></div>
+<div style="padding-top: 10px; padding-bottom: 10px; text-align: right; width: 100%">
+
+    <button id="show">手机效果预览(竖屏)</button>
+    &nbsp;&nbsp;
+    <button id="submit">提交</button>
+
+    <!--<img src="img/test"/>-->
+</div>
+
+<div id="dispOuter" class="activityDispOuter">
+    <div id="disp" class="activityDisp">
+        <div id="dispTop"></div>
+        <div id="dispContent"></div>
+    </div>
+</div>
+<div id="handleDiv" style="display:none"></div>
+
+<!-- Include the Quill library -->
+<script src="js/guide/quill.js"></script>
+<script src="js/imgUtil.js"></script>
+<script src="js/bootstrap-multiselect.js"></script>
+<script src="js/bootstrap-datetimepicker.min.js"></script>
+<!--<script src="js/parseUtil.js"></script>-->
+<!--<script src="js/require.js"></script>-->
+<script src="js/guide/add.js"></script>

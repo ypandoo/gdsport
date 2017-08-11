@@ -1,0 +1,61 @@
+<link href="css/bootstrap-switch.css" rel="stylesheet">
+<link href="css/bootstrap-multiselect.css" rel="stylesheet">
+
+<div class="radiusDiv">
+    <h2>添加管理员</h2>
+    <div class="row versionAddRow">
+        <span class="col-sm-4 versionAddTitle">用户名：</span>
+        <span class="col-sm-8 versionAddValue">
+            <input type="text" id="name" class="versionAddText"/>
+        </span>
+    </div>
+    <div class="row versionAddRow">
+        <span class="col-sm-4 versionAddTitle">真实姓名：</span>
+        <span class="col-sm-8 versionAddValue">
+            <input type="text" id="realName" class="versionAddText"/>
+        </span>
+    </div>
+    <div class="row versionAddRow">
+        <span class="col-sm-4 versionAddTitle">密码：</span>
+        <span class="col-sm-8 versionAddValue">
+            <input type="password" id="password" class="versionAddText"/>
+        </span>
+    </div>
+    <div class="row versionAddRow">
+        <span class="col-sm-4 versionAddTitle">重复密码：</span>
+        <span class="col-sm-8 versionAddValue">
+            <input type="password" id="password1" class="versionAddText"/>
+        </span>
+    </div>
+    <div class="row versionAddRow">
+        <span class="col-sm-4 versionAddTitle">管理员组：</span>
+        <span class="col-sm-8 versionAddValue">
+            <select id="group" class="versionAddText" class="pushSelect">
+                <option value="user">普通操作员</option>
+                <option value="admin">超级管理员</option>
+            </select>
+        </span>
+    </div>
+    <div class="row versionAddRow">
+        <span class="versionAddTitle col-sm-4">权限：</span>
+        <span class="versionAddValue col-sm-8">
+            <select id="features" multiple="multiple" class="pushSelect">
+                <%- featureOptions %>
+            </select>
+        </span>
+    </div>
+</div>
+<h3>
+    <div class="myAlert" id="alert">
+    </div>
+</h3>
+<div class="versionAddBottom">
+    <button id="submit">确定</button>
+    &nbsp;&nbsp;&nbsp;
+    <button id="cancel">取消</button>
+</div>
+<script src="js/bootstrap-switch.js"></script>
+<script src="js/moment.js"></script>
+<script src="js/bootstrap-switch.js"></script>
+<script src="js/bootstrap-multiselect.js"></script>
+<script src="js/user/add.js"></script>

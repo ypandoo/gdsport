@@ -1,0 +1,115 @@
+<link href="css/bootstrap-switch.css" rel="stylesheet">
+<link href="css/bootstrap-multiselect.css" rel="stylesheet">
+
+<div class="radiusDiv">   
+    <div class="row versionAddRow">
+        <span class="versionAddTitle col-sm-4">推送标题：</span>
+        <span class="versionAddValue col-sm-8">
+            <input id="title" type="text" class="versionAddText" placeholder="推送标题"/>
+        </span>
+    </div>
+    <div class="row versionAddRow">
+        <span class="versionAddTitle col-sm-4">推送目的平台：</span>
+        <span class="versionAddValue col-sm-8">        
+            <select id="platform" class="pushSelect">
+                <option value="all">所有平台</option>
+                <option value="android">仅Android</option>
+                <option value="ios">仅IOS</option>
+            </select>
+        </span>
+    </div>
+    <div class="row versionAddRow">
+        <span class="versionAddTitle col-sm-4">推送提示：</span>
+        <span class="versionAddValue col-sm-8">
+            <span class="switch" data-on="success" data-off="warning">
+                <select id="alertType" class="pushSelect">
+                    <option value="all">应用到所有平台</option>
+                    <option value="def">分平台</option>
+                </select>
+                <span id="alertSpan" class="pushItem">
+                    <input id="alert" type="text" class="versionAddText" placeholder="推送提示"/>
+                </span>
+
+                <span id="alertSpan1" style="display: none">
+                    <span class="pushItem">
+                        <textarea id="androidAlert" class="versionAddTextArea" placeholder="Android alert"></textarea>
+                        <br/>
+                        <span id="popoverAndroidAlert" class="glyphicon glyphicon-question-sign" data-toggle="popover" title="Android alert hint" 
+                              data-content=""></span>
+                    </span>
+                    <span>
+
+                    </span>
+                    <span class="pushItem">
+                        <textarea id="iosAlert" class="versionAddTextArea" placeholder="IOS alert"></textarea>
+                        <br/>
+                        <span id="popoverIosAlert" class="glyphicon glyphicon-question-sign" data-toggle="popover" title="IOS alert hint" 
+                              data-content=""></span>
+                    </span>
+                </span>
+            </span>
+    </div>
+
+    <div class="row versionAddRow">
+        <span class="versionAddTitle col-sm-4">附加信息：</span>
+        <span class="versionAddValue col-sm-8">        
+            <select class="pushSelect" id="hasExtraMsg">
+                <option value="0">无</option>
+                <option value="1">有</option>
+            </select>
+            <span id="extraMsgSpan" class="pushItem" style="display: none">
+                <textarea id="extraMsg" class="versionAddTextArea" placeholder="Extra message"></textarea>
+                <br/>
+                <span id="popoverExtraMsg" class="glyphicon glyphicon-question-sign" data-toggle="popover" title="Extra Message hint" 
+                      data-content=""></span>
+            </span>
+        </span>
+
+    </div>
+    <div class="row versionAddRow">
+        <span class="versionAddTitle col-sm-4">离线消息保留：</span>
+        <span class="versionAddValue col-sm-8">
+            <input id="timeToLive" type="text" class="versionAddText" placeholder="(秒)"/>
+        </span>
+    </div>
+    <div class="row versionAddRow">
+        <span class="versionAddTitle col-sm-4">生产环境：</span>
+        <span class="versionAddValue col-sm-8">
+            <select id="apnsProduction" class="pushSelect">
+                <option value="1">是</option>
+                <option value="0">否</option>
+            </select>
+        </span>
+    </div>
+
+    <div class="row versionAddRow">
+        <span class="versionAddTitle col-sm-4">缓慢推送：</span>
+        <span class="versionAddValue col-sm-8">
+            <select id="isBigPush" class="pushSelect">
+                <option value="0">否</option>
+                <option value="1">是</option>
+            </select>
+            <span id="bigPushSpan" class="pushItem" style="display:none">
+                <input id="bigPushDuration" type="text" class="versionAddText" placeholder="(分钟)"/>
+            </span>
+        </span>
+    </div>
+    <div class="row versionAddRow">
+        <span class="versionAddTitle col-sm-4">推送消息：</span>
+        <span class="versionAddValue col-sm-8">
+            <textarea id="msgContent" class="versionAddTextArea"></textarea>
+        </span>
+    </div>
+</div>
+<h3>
+    <div class="myAlert" id="myAlert">
+    </div>
+</h3>
+<div class="versionAddBottom">
+    <button id="submit">推送</button>
+    &nbsp;&nbsp;&nbsp;
+    <button id="cancel">取消</button>
+</div>
+<script src="js/bootstrap-switch.js"></script>
+<script src="js/bootstrap-multiselect.js"></script>
+<script src="js/push/all.js"></script>

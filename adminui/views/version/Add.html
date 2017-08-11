@@ -1,0 +1,80 @@
+<link href="css/bootstrap-switch.css" rel="stylesheet">
+<link href="css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+<ul class="nav nav-tabs" role="tablist" id="versionAddNav">
+    <li role="presentation" class="active"><a href="android">Android</a></li>
+    <li role="presentation"><a href="ios">IOS</a></li>
+</ul>
+<div class="bottomRadiusDiv">   
+    <div class="row versionAddRow">        
+        <span class="col-sm-4 versionAddTitle">版本号：</span>
+        <span class="col-sm-8 versionAddValue">
+            <input type="text" id="name" class="versionAddText"/>
+        </span>
+    </div>
+    <div class="row versionAddRow">
+        <span class="col-sm-4 versionAddTitle">下载地址：</span>
+        <span class="col-sm-8 versionAddValue">        
+            <input type="text" id="url" class="versionAddText"/>
+        </span>
+    </div>
+    <div class="row versionAddRow">
+        <span class="col-sm-4 versionAddTitle">是否强制升级：</span>
+        <span class="col-sm-8 versionAddValue">
+            <span class="switch" data-on="success" data-off="warning">
+                <input type="checkbox" id="forceUpdate"/>
+            </span>
+        </span>
+    </div>
+    <div class="row versionAddRow">
+        <span class="col-sm-4 versionAddTitle">设为当前版本：</span>
+        <span class="col-sm-8 versionAddValue">
+            <span class="switch" data-on="success" data-off="warning">
+                <input type="checkbox" id="current"/>
+            </span>
+        </span>
+    </div>
+    <div class="row versionAddRow">
+        <span class="col-sm-4 versionAddTitle">发布日期：</span>
+        <span class="versionAddValue col-sm-8" style="padding:0">
+            <span class="form-group col-sm-8">
+                <span class='input-group date' id='dtRd'>
+                    <input type='text' class="form-control versionAddText" id="releaseDate"/>
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </span>
+            </span>
+        </span>
+    </div>
+    <div class="row versionAddRow">
+        <span class="col-sm-4 versionAddTitle">安装包尺寸：</span>
+        <span class="col-sm-8 versionAddValue">
+            <input type="text" id="size" class="versionAddText"/>(MB)
+        </span>
+    </div>
+    <div class="row versionAddRow">
+        <span class="col-sm-4 versionAddTitle">内部版本号：</span>
+        <span class="col-sm-8 versionAddValue">
+            <input type="text" id="code" class="versionAddText"/>
+        </span>
+    </div>
+    <div class="row versionAddRow">
+        <span class="col-sm-4 versionAddTitle">版本说明：</span>
+        <span class="col-sm-8 versionAddValue">
+            <textarea id="memo" class="versionAddTextArea"></textarea>
+        </span>
+    </div>
+</div>
+<h3>
+    <div class="myAlert" id="alert">
+    </div>
+</h3>
+<div class="versionAddBottom">
+    <button id="submit">确定</button>
+    &nbsp;&nbsp;&nbsp;
+    <button id="cancel">取消</button>
+</div>
+<script src="js/bootstrap-switch.js"></script>
+<script src="js/moment.js"></script>
+<script src="js/bootstrap-datetimepicker.min.js"></script>
+<script src="js/version/add.js"></script>

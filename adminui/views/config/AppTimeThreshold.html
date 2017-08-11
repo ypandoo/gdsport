@@ -1,0 +1,31 @@
+<div class="row">
+    <div class="col-sm-6">
+        <div class="configTitle">配置项值：</div>
+        <textarea id="configValue" class="configValue"></textarea>
+    </div>
+    <div class="col-sm-6">
+        <div class="configTitle">示例：</div>
+        <div class="configExample">
+            配置项值为数字， 单位为秒
+            <br/> 此值表示App客户端与服务器标准时间戳的可接受误差值区间
+            <br/> 例如：86400 为一整天， 表明客户端与服务器时间差前后一天都是可以接受的。
+            <br/> 为了尽可能减少误差，推荐设置为10分钟，即600
+        </div>
+
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12 ">
+        <h3>
+            <div class="myAlert" id="alert">
+            </div>
+        </h3>
+        <div style="text-align: center">
+            <button id="submit">保存</button> &nbsp;&nbsp;
+            <button id="cancel">取消</button>
+        </div>
+    </div>
+    <script src="js/util.json.js"></script>
+    <script src="js/config/common.js"></script>
+    <script src="js/config/AppTimeThreshold.html.js"></script>
+</div>

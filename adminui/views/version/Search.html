@@ -1,0 +1,133 @@
+<link href="css/bootstrap-switch.css" rel="stylesheet">
+<link href="css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+<div class="row">
+    <div class="col-sm-12" id="versionList">
+        <div class="configTitle">搜索条件：</div>
+        <div class="configExample" style="min-height: 20px; padding:10px">
+            <div class="row versionAddRow">
+                <span class="versionAddTitle col-sm-4">是否强制升级：</span>
+                <span class="versionAddValue col-sm-8">
+                    <span class="switch" data-on="success" data-off="warning">
+                        <input type="checkbox" id="forceUpdate"/>
+                    </span>
+                </span>
+            </div>
+            <div class="row versionAddRow">
+                <span class="versionAddTitle col-sm-4">设为当前版本：</span>
+                <span class="versionAddValue col-sm-8">
+                    <span class="switch" data-on="success" data-off="warning">
+                        <input type="checkbox" id="current"/>
+                    </span>
+                </span>
+            </div>
+            <div class="row versionAddRow">
+                <span class="col-sm-4 versionAddTitle" style="display: inline">
+                    <span>发布时间段：</span>
+                </span>
+                <span class="form-group col-sm-4 versionAddValue" style="display: inline">
+                    <span class='input-group date' id='dtFrom'>
+                        <input type='text' class="form-control" id="from"/>
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </span>
+                </span>
+                <span class="form-group col-sm-4 versionAddValue" style="display: inline">
+                    <span class='input-group date' id='dtTo'>
+                        <input type='text' class="form-control" id="to"/>
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </span>
+                </span>
+            </div>
+            <div style="width: 100%; text-align: right">
+                <button id="submit">搜索</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div style="padding: 10px"></div>
+<div class="row">
+    <div class="col-sm-12" id="versionDetail">
+
+        <table class="table table-striped">
+            <thead class="tbHeader">
+                <tr>
+                    <th>编号
+                    </th>
+                    <th>版本号</th>
+                    <th>类型</th>                       
+                    <th>设为当前版本</th>
+                    <th>设为强制升级</th>                        
+                    <th>发布日期</th>                        
+                    <th>说明</th>
+                </tr>
+            </thead>
+            <tbody id="versionTbody">
+            </tbody>
+        </table>
+
+    </div>
+</div>
+<div class="col-sm-12" id="versionUpdate" style="display:none">
+    <ul class="nav nav-tabs" role="tablist" id="versionAddNav">
+        <li role="presentation" class="active"><a href="android">Android</a></li>
+        <li role="presentation"><a href="ios">IOS</a></li>
+    </ul>
+    <div class="bottomRadiusDiv">   
+        <div class="versionAddRow">
+            <span class="versionAddTitle">版本号：</span>
+            <span class="versionAddValue">
+                <input type="text" id="name" class="versionAddText" readonly="readonly"/>
+            </span>
+        </div>
+        <div class="versionAddRow">
+            <span class="versionAddTitle">下载地址：</span>
+            <span class="versionAddValue">        
+                <input type="text" id="url" class="versionAddText"/>
+            </span>
+        </div>
+        <div class="versionAddRow">
+            <span class="versionAddTitle">是否强制升级：</span>
+            <span class="versionAddValue">
+                <span class="switch" data-on="success" data-off="warning">
+                    <input type="checkbox" id="forceUpdate1"/>
+                </span>
+            </span>
+        </div>
+        <div class="versionAddRow">
+            <span class="versionAddTitle">设为当前版本：</span>
+            <span class="versionAddValue">
+                <span class="switch" data-on="success" data-off="warning">
+                    <input type="checkbox" id="current1"/>
+                </span>
+            </span>
+        </div>
+        <div class="versionAddRow">
+            <span class="versionAddTitle">发布日期：</span>
+            <span class="versionAddValue">        
+                <input type="text" id="releaseDate" class="versionAddText"/>
+            </span>
+        </div>
+        <div class="versionAddRow">
+            <span class="versionAddTitle">版本说明：</span>
+            <span class="versionAddValue">
+                <textarea id="memo" class="versionAddTextArea"></textarea>
+            </span>
+        </div>
+    </div>
+    <h3>
+        <div class="myAlert" id="alert">
+        </div>
+    </h3>
+    <div class="versionAddBottom">
+        <button id="updateSubmit">修改</button>
+        &nbsp;&nbsp;&nbsp;
+        <button id="cancel">取消</button>
+    </div>
+</div>
+<script src="js/bootstrap-switch.js"></script>
+<script src="js/moment.js"></script>
+<script src="js/bootstrap-datetimepicker.min.js"></script>
+<script src="js/version/search.js"></script>

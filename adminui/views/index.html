@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>兴业银行.路人甲——管理入口</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap theme -->
+    <link href="css/bootstrap-theme.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/theme.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]>
+    <script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="js/ie-emulation-modes-warning.js"></script>
+    <link href="css/cibAdmin.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="//cdn.bootcss.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body role="document">
+<!-- Fixed navbar -->
+<nav class="navbar navbar-fixed-top indexLogoBg">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed indexToggleMenu" data-toggle="collapse"
+                    data-target="#navbar" aria-expanded="false"
+                    aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#"><img src="img/logo1.png" class="indexLogo"></a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#main" class="indexHeadLink">首页</a></li>
+                <% if( !featureTitles ){ } else { %>
+                <%- featureTitles %>
+                <% } %>
+                <% if ( !login ) { } else { %>
+                <li><a href="#personalinfo" id="usrInfoBtn" class="indexHeadLink">个人信息</a></li>
+                <% } %>
+                <!--<li><a href="#config" class="indexHeadLink">配置项</a></li>
+                <li><a href="#version" class="indexHeadLink">版本升级</a></li>
+                <li><a href="#activity" class="indexHeadLink">活动</a></li>
+                <li><a href="#push" class="indexHeadLink">推送</a></li>
+                <li><a href="#factory" class="indexHeadLink">工厂数据</a></li>
+                <li><a href="#guide" class="indexHeadLink">指南</a></li>-->
+
+
+                <!--<li><a href="#terminal" class="indexHeadLink">终端信息</a></li>
+                <li><a href="#sports" class="indexHeadLink">运动数据</a></li>
+                <li><a href="#user" class="indexHeadLink">用户</a></li>
+                <li><a href="#publictransit" class="indexHeadLink">公交</a></li>
+                <li><a href="#ecash" class="indexHeadLink">电子现金</a></li>-->
+                <!--<li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">Action</a></li>
+                        <li><a href="#">Another action</a></li>
+                        <li><a href="#">Something else here</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li class="dropdown-header">Nav header</li>
+                        <li><a href="#">Separated link</a></li>
+                        <li><a href="#">One more separated link</a></li>
+                    </ul>
+                </li>-->
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <% if ( !login ) { %>
+                    <a href="#login" class="indexHeadLink">登录</a>
+                    <% } else { %>
+                    <a href="#logout" id="logoutBtn" class="indexHeadLink"><%= realname %> 注销</a>
+                    <% }%>
+                </li>
+                <!--<li><a href="#contact" class="indexHeadLink">注册</a></li>-->
+            </ul>
+        </div>
+        <!--/.nav-collapse -->
+    </div>
+</nav>
+
+
+<div class="container theme-showcase" role="main">
+    <div id="loader">
+
+    </div>
+</div>
+
+
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/docs.min.js"></script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="js/ie10-viewport-bug-workaround.js"></script>
+<script src="js/index.js"></script>
+</body>
+
+</html>

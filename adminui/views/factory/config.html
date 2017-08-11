@@ -1,0 +1,42 @@
+
+<div class="row">
+    <div class="col-sm-6">
+        <div class="configTitle">配置项值：</div>
+        <textarea id="configValue" class="configValue"></textarea>
+    </div>
+    <div class="col-sm-6">
+        <div class="configTitle">示例：</div>
+        <div class="configExample">
+            ["字段名称1","字段名称2"....]<br/><br/>
+            注意：导入文件为CSV格式，即逗号分隔的文本文件格式。配置中的字段名称与
+            导入文件的每行数据相对应。<br/><br/>
+            例如：<br/>
+            文件中的一行记录为: <br/>
+            张三,2012-01-01,男,38997908,00900099<br/><br/>
+            本配置信息为：<br/>
+            ["name","createAt","gender","ID","cardID"]<br/><br/>
+            那么导入之后的键值对关系如下：<br/>
+            name = "张三" <br/>
+            createAt = "2012-01-01" <br/>
+            gender = "男" <br/>
+            ID = "38997908" <br/>
+            cardID = "00900099" <br/>
+        </div>
+
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12 ">
+        <h3>
+            <div class="myAlert" id="alert">
+            </div>
+        </h3>
+        <div style="text-align: center">
+            <button id="submit">保存</button> &nbsp;&nbsp;
+            <button id="cancel">取消</button>
+        </div>
+    </div>
+    <script src="js/util.json.js"></script>
+    <script src="js/config/common.js"></script>
+    <script src="js/config/Factory.html.js"></script>
+</div>

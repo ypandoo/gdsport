@@ -1,0 +1,29 @@
+<!--<form id='uploadForm' 
+      action='/factory/importCsv' 
+      method='post' 
+      encType="multipart/form-data">-->
+<div class="radiusDiv"> 
+    <div class="row versionAddRow">        
+        <span class="col-sm-4 versionAddTitle">需要导入的文件（CSV格式）：</span>
+        <span class="col-sm-8 versionAddValue">
+            <input type="file" id="csvFile" name="csvFile"/>
+        </span>
+    </div>
+</div>
+<div id="waitingDiv" 
+     style="padding-top: 10px; padding-bottom: 10px; text-align: center; width: 100%; display: none">
+    <img src="img/transLoading2.gif">&nbsp;&nbsp;&nbsp;请稍候，正在上传并导入文件...</div>
+<div id="alert" class="myAlert" style="padding-top: 10px; padding-bottom: 10px;
+     text-align: right; width: 100%"></div>
+<div style="padding-top: 10px; padding-bottom: 10px; text-align: right; width: 100%">
+
+    <!--<input id="submit" name="submit" type="submit" value="提交"/>-->
+    <button id="doImport" style="display:none">执行导入</button>
+
+    <!--<img src="img/test"/>-->
+</div>    
+<div id="tmpStore" style="display:none"></div>
+<!--</form>-->
+
+<script src="js/imgUtil.js"></script>
+<script src="js/factory/import.js"></script>

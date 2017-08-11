@@ -1,0 +1,155 @@
+<link href="css/quill.snow.css" rel="stylesheet">
+<link href="css/quill.bubble.css" rel="stylesheet">
+<link href="css/quill.core.css" rel="stylesheet">
+<link href="css/bootstrap-switch.css" rel="stylesheet">
+<link href="css/bootstrap-multiselect.css" rel="stylesheet">
+<link href="css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+<div class="row versionAddRow">        
+    <span class="col-sm-4 versionAddTitle">活动标题：</span>
+    <span class="col-sm-8 versionAddValue">
+        <input type="text" id="title" class="versionAddText"/>
+    </span>
+</div>
+<div class="row versionAddRow">        
+    <span class="col-sm-4 versionAddTitle">活动时间：</span>
+    <span class="col-sm-8 versionAddValue">
+        <input type="text" id="duration" class="versionAddText"/>
+        <span class="glyphicon glyphicon-question-sign" data-toggle="popover" title="填写活动时间段" 
+              data-content="例如：2016.7.1 - 2016.10.31"></span>
+    </span>
+</div>
+<div class="row versionAddRow">        
+    <span class="col-sm-4 versionAddTitle">启用时间：</span>
+    <span class="form-group col-sm-5 versionAddValue" style="display: inline">
+        <span class='input-group date' id='dtFrom'>
+            <input type='text' class="form-control versionAddText" id="startAfter"/>
+            <span class="input-group-addon">
+                <span class="glyphicon glyphicon-calendar"></span>
+            </span>            
+        </span>
+        <span class="glyphicon glyphicon-question-sign" data-toggle="popover" title="启用时间" 
+              data-content="从启用时间开始显示活动"></span>
+    </span>
+</div>
+<div class="row versionAddRow">        
+    <span class="col-sm-4 versionAddTitle">禁用时间：</span>
+    <span class="form-group col-sm-4 versionAddValue" style="display: inline">
+        <span class='input-group date' id='dtTo'>
+            <input type='text' class="form-control versionAddText" id="endBefore"/>
+            <span class="input-group-addon">
+                <span class="glyphicon glyphicon-calendar"></span>
+            </span>
+        </span>
+        <span class="glyphicon glyphicon-question-sign" data-toggle="popover" title="禁用时间" 
+              data-content="超过禁用时间之后，活动将不再显示"></span>
+    </span>
+</div>
+<div class="row versionAddRow">        
+    <span class="col-sm-4 versionAddTitle">是否启用：</span>
+    <span class="col-sm-8 versionAddValue">
+        <select class="pushSelect" id="isAvail">
+            <option value="1">是</option>
+            <option value="0">否</option>
+        </select>
+    </span>
+</div>
+<div class="row versionAddRow">        
+    <span class="col-sm-4 versionAddTitle">索引图标1：</span>
+    <span class="col-sm-8 versionAddValue">
+        <input type="file" id="tileSrc1"/>
+        <img id="tileImg1" width="100" height="100" style="display: none"/>
+    </span>
+</div>
+<div class="row versionAddRow">        
+    <span class="col-sm-4 versionAddTitle">索引图标2：</span>
+    <span class="col-sm-8 versionAddValue">
+        <input type="file" id="tileSrc2"/>
+        <img id="tileImg2" width="100" height="100" style="display: none"/>
+    </span>
+</div>
+<div class="row versionAddRow">        
+    <span class="col-sm-4 versionAddTitle">置顶图片：</span>
+    <span class="col-sm-8 versionAddValue">
+        <input type="file" id="topSrc"/>
+        <img id="topImg" width="145" height="100" style="display: none"/>
+    </span>
+</div>
+
+<!-- Create the toolbar container -->
+<div id="toolbar-container" class="activity_toolbar">
+    <span class="ql-formats">
+        <select class="ql-font">
+        </select>
+        <select class="ql-size"></select>
+    </span>
+    <span class="ql-formats">
+        <button class="ql-bold"></button>
+        <button class="ql-italic"></button>
+        <button class="ql-underline"></button>
+        <button class="ql-strike"></button>
+    </span>
+    <span class="ql-formats">
+        <select class="ql-color"></select>
+        <select class="ql-background"></select>
+    </span>
+    <span class="ql-formats">
+        <button class="ql-script" value="sub"></button>
+        <button class="ql-script" value="super"></button>
+    </span>
+    <span class="ql-formats">
+        <button class="ql-header" value="1"></button>
+        <button class="ql-header" value="2"></button>
+        <button class="ql-blockquote"></button>
+        <button class="ql-code-block"></button>
+    </span>
+    <span class="ql-formats">
+        <button class="ql-list" value="ordered"></button>
+        <button class="ql-list" value="bullet"></button>
+        <button class="ql-indent" value="-1"></button>
+        <button class="ql-indent" value="+1"></button>
+    </span>
+    <span class="ql-formats">
+        <button class="ql-direction" value="rtl"></button>
+        <select class="ql-align"></select>
+    </span>
+    <span class="ql-formats">
+        <button class="ql-link"></button>
+        <button class="ql-image"></button>
+        <button class="ql-video"></button>
+        <button class="ql-formula"></button>
+    </span>
+    <span class="ql-formats">
+        <button class="ql-clean"></button>
+    </span>
+</div>
+
+<!-- Create the editor container -->
+<div id="editor">
+
+</div>
+<div id="alert" class="myAlert" style="padding-top: 10px; padding-bottom: 10px;
+     text-align: right; width: 100%"></div>
+<div style="padding-top: 10px; padding-bottom: 10px; text-align: right; width: 100%">
+
+    <button id="show">手机效果预览(竖屏)</button>&nbsp;&nbsp;
+    <button id="submit">提交</button>
+
+    <!--<img src="img/test"/>-->
+</div>
+
+<div id="dispOuter" class="activityDispOuter">
+    <div id="disp" class="activityDisp">
+        <div id="dispTop"></div>
+        <div id="dispContent"></div>
+    </div>
+</div>
+<div id="handleDiv" style="display:none"></div>
+
+<!-- Include the Quill library -->
+<script src="js/activity/quill.js"></script>
+<script src="js/imgUtil.js"></script>
+<script src="js/bootstrap-multiselect.js"></script>
+<script src="js/bootstrap-datetimepicker.min.js"></script>
+<!--<script src="js/parseUtil.js"></script>-->
+<!--<script src="js/require.js"></script>-->
+<script src="js/activity/add.js"></script>

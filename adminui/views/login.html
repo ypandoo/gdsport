@@ -1,0 +1,38 @@
+<h1 class="h2" style="text-align: center; font-family: 黑体; padding-top:25px">
+    登录
+</h1>
+<div class="row">
+    <div class="col-sm-6 col-sm-offset-3">
+        <form action='/login' method='post' autocomplete="off">
+            <div class="form-group">
+                <label for="name">用户名</label>
+                <input tabindex=2 class="form-control" id="name" name="name" type="text" required="required" autocorrect="off" autocapitalize="off" value="" autofocus autocomplete="on">
+            </div>
+            <div class="form-group mtxl">
+                <div class="row">
+                    <div class="col-xs-6">
+                        <label for="password">密码</label>
+                    </div>
+                    <div class="col-xs-18 txt-r">
+                        <!--<a tabindex=5 href="/forgot" data-event-name="login-form-forgotPassword">Recover your Password</a>-->
+                    </div>
+                </div>
+
+                <input tabindex=3 class="form-control" id="password" type="password" name="password" required="required" >
+            </div>
+            <div class="form-group login-div">
+                <button tabindex=4 type="button" id="submit" class="btn btn-highlight-1 btn-block" data-event-name="login-form-login">
+                    登录
+                </button>
+            </div>
+            <div class="myAlert" id="myAlert">
+            </div>
+            <!--<h5 class="lined-heading bg-neutral-11 txt-c mtxxl em-low mbxl"><span>Don't have an account?</span></h5>
+            <a class="btn btn-default btn-block em-low" href="/signup" rel="npm:signup" data-event-name="login-form-signup">Create an Account</a>-->
+            <input type="hidden" name="done" value="">
+            <input type="hidden" name="loginAs" value="">
+            <input type="hidden" name="crumb" value="Y__9dbbI6uxuRvTavHjbrPR0b-p5BixacbOjzkxtG9g"/>
+        </form>
+    </div>
+</div>
+<script src="js/login/index.js"></script>
