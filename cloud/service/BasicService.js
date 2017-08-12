@@ -1,33 +1,71 @@
 /**
  * Created by yuhailong on 07/04/2017.
  */
-var i18n = require('i18n');
+
 var _ = require('lodash');
+var i18n = require('i18n');
 i18n.configure({
     directory: __dirname + "/../locale"
 });
 var errors = require("../errcode.js");
+const ParseLogger = require('../../parse-server').logger;
 const commonFunc = require("./CommonFuncs");
 var ConfigInfos = Parse.Object.extend("configinfos");
-var BandUser = Parse.Object.extend("BandUser");
-var ActivityInfos = Parse.Object.extend("activityinfos");
-var GuideInfos = Parse.Object.extend("guideinfos");
-var AppVersion = Parse.Object.extend("versioninfos");
+//var BandUser = Parse.Object.extend("BandUser");
+//var ActivityInfos = Parse.Object.extend("activityinfos");
+//var GuideInfos = Parse.Object.extend("guideinfos");
+var AppVersions = Parse.Object.extend("versioninfos");
 
 
+exports.getAppVersions = function (req, res) {
+    commonFunc.setI18n(req, i18n);
+    Parse.User.enableUnsafeCurrentUser();
+    var query = new Parse.Query(AppVersions);
+    query.equalTo('current', true);
+    query.equalTo('type', 'android')
+    query.descending('createdAt');
+
+    query.first({
+        useMasterKey: true
+    }).then(function (v) {
+        // If not, create a new user.
+        if (!v) {
+            ParseLogger.log("warn", "Cannot find the version data", { "req": req });
+            return res.error(errors["noData"], i18n.__("noData"));
+        }
+        res.success({
+            "name": v.get("name"),
+            "code": v.get("code"),
+            "releasedate": v.get("releaseDate"),
+            "memo": v.get("memo"),
+            "forceupdate": v.get("forceUpdate") ? 1 : 0,
+            "url": v.get("url"),
+            "size": v.get("size")
+        })
+        var b = true;
+
+    }, function (err) {
+        ParseLogger.log("error", err, { "req": req });
+        res.error(errors["internalError"], i18n.__("internalError"));
+    });
+};
+
+exports.uploadEvents = function (req, res) { };
+exports.instantiateApp = function (req, res) { };
+exports.updateInstance = function (req, res) { };
 exports.sendSMSCode = function (req, res) {
     commonFunc.setI18n(req, i18n);
     const phoneNumber = req.params.phonenum;
 
     if (typeof phoneNumber === "undefined") {
         res.error(errors["noPhoneNb"], i18n.__("noPhoneNb"));
-        logger.error(i18n.__("noPhoneNb"), { "req": req });
+        ParseLogger.error(i18n.__("noPhoneNb"), { "req": req });
         return;
     }
 
     const reg = /^1[0-9]{10}$/;
     if (!reg.test(phoneNumber)) {
-        logger.error(i18n.__("invalidPhoneFormat"), { "req": req });
+        ParseLogger.error(i18n.__("invalidPhoneFormat"), { "req": req });
         return res.error(errors["invalidPhoneFormat"], i18n.__("invalidPhoneFormat"));
     }
 
@@ -35,7 +73,7 @@ exports.sendSMSCode = function (req, res) {
     then(function (ret) {
         return commonFunc.sendSmsCode(phoneNumber);
     }, function (err) {
-        logger.error(err, { "req": req });
+        ParseLogger.error(err, { "req": req });
         res.error(errors[err], i18n.__(err));
         reject(err);
         return;
@@ -43,7 +81,7 @@ exports.sendSMSCode = function (req, res) {
     .then(function (doc) {
         return commonFunc.hiddenPhoneNo(phoneNumber);
     }, function (err) {
-        logger.error( err, { "req": req });
+        ParseLogger.error( err, { "req": req });
         res.error(errors["smsCodeFrequent"], i18n.__("smsCodeFrequent"));
         reject(err);
         return;
@@ -54,19 +92,13 @@ exports.sendSMSCode = function (req, res) {
     }).then(function(){
         let ret = {};
         ret.phoneNumber = finalNo;
-        res.success(ret);
+        return res.success(ret);
     }, function (err) {
-        logger.error( err, { "req": req });
-        res.error(errors["internalError"], i18n.__("internalError"));
+        ParseLogger.error( err, { "req": req });
+        return res.error(errors["internalError"], i18n.__("internalError"));
     });
 
 };
-
-
-
-/**
- * Start for the Admin UI controlled modules
- */
 
 exports.getSettings = function (req, res) {
     commonFunc.setI18n(req, i18n);
@@ -166,44 +198,3 @@ exports.getSettings = function (req, res) {
 //     });
 // });
 
-exports.getAppVersions = function (req, res) {
-    commonFunc.setI18n(req, i18n);
-
-    Parse.Cloud.useMasterKey();
-    Parse.User.enableUnsafeCurrentUser();
-    var query = new Parse.Query(AppVersion);
-    query.equalTo('current', true);
-    query.equalTo('type', 'android')
-    query.descending('createdAt');
-
-
-    query.first({
-        useMasterKey: true
-    }).then(function (v) {
-        // If not, create a new user.
-        if (!v) {
-            ParseLogger.log("warn", "Cannot find the version data", { "req": req });
-            return res.error(errors["noData"], i18n.__("noData"));
-        }
-        res.success({
-            "name": v.get("name"),
-            "code": v.get("code"),
-            "releasedate": v.get("releaseDate"),
-            "memo": v.get("memo"),
-            "forceupdate": v.get("forceUpdate") ? 1 : 0,
-            "url": v.get("url"),
-            "size": v.get("size")
-        })
-        var b = true;
-
-    }, function (err) {
-        ParseLogger.log("error", err, { "req": req });
-        res.error(errors["internalError"], i18n.__("internalError"));
-    });
-
-};
-
-exports.uploadEvents = function (req, res) { };
-exports.instantiateApp = function (req, res) { };
-
-exports.updateInstance = function (req, res) { };

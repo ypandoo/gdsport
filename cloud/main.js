@@ -44,10 +44,10 @@ restrictedAcl.setPublicWriteAccess(false);
 
 Parse.Cloud.define("sendSMSCode", BasicService.sendSMSCode);
 Parse.Cloud.define("getSettings", BasicService.getSettings);
-Parse.Cloud.define("getAppVersions", BasicService.sendSMSCode);
-Parse.Cloud.define("uploadEvents", BasicService.sendSMSCode);
-Parse.Cloud.define("instantiateApp", BasicService.sendSMSCode);
-Parse.Cloud.define("updateInstance", BasicService.sendSMSCode);
+Parse.Cloud.define("getAppVersions", BasicService.getAppVersions);
+Parse.Cloud.define("uploadEvents", BasicService.uploadEvents);
+Parse.Cloud.define("instantiateApp", BasicService.instantiateApp);
+Parse.Cloud.define("updateInstance", BasicService.updateInstance);
 
 Parse.Cloud.define("signup", UserService.signup);
 Parse.Cloud.define("signin", UserService.signin);

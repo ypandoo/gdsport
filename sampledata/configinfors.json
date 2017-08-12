@@ -1,3 +1,15 @@
+//config infos
+db.createCollection('configinfos');
+db.getCollection('_SCHEMA').save({
+  "_id": "configinfos",
+  "objectId": "string",
+  "updatedAt": "date",
+  "createdAt": "date",
+  "name": "string",
+  "value": "string",
+  "alias": "string"
+});
+
 db.configinfos.save({"_id":"30qrAaJQ01","name":"电子现金适用城市","value":"[\"北京\",\"上海\"]","alias":"ECashCity"});
 db.configinfos.save({"_id":"sLqsjZc1dh","name":"手环信息导入配置","value":"[\"phoneNo\",\"bandName\",\"cardName\",\"name\"]","alias":"FactoryImport"});
 db.configinfos.save({"_id":"3jQ15DTNho","name":"不支持升级版本号","value":"[]","alias":"UnsupportUpdateVersion"});
@@ -20,12 +32,35 @@ db.configinfos.save({"_id":"P4sXvDoipg","name":"是否上传日志","value":"1",
 db.configinfos.save({"_id":"mTnpoNo5JV","name":"客户端时间允许误差","value":"600","alias":"AppTimeThreshold"});
 db.configinfos.save({"_id":"h4jn9OwmOH","name":"实时运动数据刷新间隔","value":"300","alias":"SportDataRefresh"});
 
+
+//version infos
+db.createCollection('versioninfos');
 db.getCollection('_SCHEMA').save({
-  "_id": "configinfos",
+  "_id": "versioninfos",
   "objectId": "string",
   "updatedAt": "date",
   "createdAt": "date",
+  "releaseDate": "date",
   "name": "string",
-  "value": "string",
-  "alias": "string"
-});
+  "url": "string",
+  "type": "string",
+  "current": "boolean",
+  "forceUpdate": "boolean",
+  "memo": "string",
+  "size": "string",
+  "code": "string"
+})
+
+db.versioninfos.save({
+  "releaseDate": ISODate("2016-09-29T16:00:00Z"),
+  "name": "1.0.4",
+  "url": "http://pkg-mt1.fir.im/9774a84f34fd896f2b855b5af00a3b1bd98babd9.apk?filename=convego-app-cibxdl-demo-release.apk_1.0.4.apk",
+  "type": "android",
+  "current": true,
+  "forceUpdate": true,
+  "memo": "1.实现widget与app间依赖处理；\n2.实现固件版本检测界面可重新绑定功能；\n3.实现解绑后清消息功能；\n4.修正app内固件升级停留在loading界面问题；\n5.修正身高，体重，出生年月等输入无有效性检测问题；\n6.修正解绑后个人信息未清除问题;\n7.修正退出手环设置界面程序崩溃问题。",
+  "size": "26.8",
+  "code": "5"
+})
+
+//

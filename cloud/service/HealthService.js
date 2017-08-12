@@ -8,24 +8,26 @@ i18n.configure({
 });
 var errors = require("../errcode.js");
 const commonFunc = require("./CommonFuncs");
-var MacTool = require("../tools/macUtil");
+//var MacTool = require("../tools/macUtil");
 
 var MAX_RATING = 100;
-
-
-var BandUser = Parse.Object.extend("BandUser");
 var RawSportData = Parse.Object.extend("RawSportData");
 var SportDataOfDay = Parse.Object.extend("SportDataOfDay");
 var SportDataOfHour = Parse.Object.extend("SportDataOfHour");
+var RawSleepData = Parse.Object.extend("RawSleepData");
+var DeviceInfos = Parse.Object.extend("deviceinfos");
+const ParseLogger = require('../../parse-server').logger;
 
 exports.uploadHealthData = function (req, res) {
     commonFunc.setI18n(req, i18n);
-    var bandName = req.params.devicename;
-    var datas = req.params.data;
+    var devicename = req.params.devicename;
+    var sportdata = req.params.sportdata;
+    var sleepdata = req.params.sleepdata;
     var uptime = req.params.uploadtime;
+
     // var mac = req.params.mac;
-    if (!bandName || !datas || !uptime ) {
-        ParseLogger.log("warn", "No bandName or datas set in the param", {"req": req});
+    if (!devicename || !uptime || !sportdata) {
+        ParseLogger.log("warn", "No devicename ,times, sportdata set in the param", {"req": req});
         res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
         return;
     }
@@ -36,67 +38,42 @@ exports.uploadHealthData = function (req, res) {
             Parse.Promise.reject("");
             return;
         } else {
-            var bandUserQuery = new Parse.Query(BandUser);
-            bandUserQuery.equalTo("bandName", bandName);
-            return bandUserQuery.first({useMasterKey: true});
+            var deviceQuery = new Parse.Query(DeviceInfos);
+            deviceQuery.equalTo("devicename", devicename);
+            return deviceQuery.first();
         }
     }, function (err) {
         ParseLogger.log("error", err, {"req": req});
         res.error(errors[err], i18n.__(err));
-        Parse.Promise.reject("");
-        return;
-    }).then(function (bandUsr) {
-        var sessionMacKey = bandUsr.get("sessionMacKey");
-        if (MacTool.validMac(req.params, sessionMacKey)) {
-            return Parse.Promise.as(1);
-        } else {
-            ParseLogger.log("error", "Failed to validate the MAC", {"req": req});
-            res.error(errors["invalidMac"], i18n.__("invalidMac"));
-            Parse.Promise.reject("");
-            return;
+        return reject("");
+    }).then(function (deviceInfo) {
+        if(!deviceInfo)
+        {
+            ParseLogger.log("error", err, { "req": req });
+            res.error(errors[err], i18n.__('DeviceNotFound'));
+            return reject("");
         }
-    }, function (err) {
-        ParseLogger.log("error", err, {"req": req});
-        res.error(errors[err], i18n.__(err));
-        Parse.Promise.reject("");
-        return;
-    }).then(function () {
-        Parse.Cloud.useMasterKey();
-        Parse.User.enableUnsafeCurrentUser();
-        var index = 0;
+
+        //Sport data
         var count = 0;
-        var query = new Parse.Query(BandUser);
-        query.equalTo('bandName', bandName);
-        query.ascending('createdAt');
-        return query.first({
-            useMasterKey: true
-        }).then(function (band) {
-            // If not, create a new user.
-            if (!band) {
-                ParseLogger.log("warn", "Cannot find the band", {"req": req});
-                return res.error(errors["noBandFound"], i18n.__("noBandFound"));
-            }
-
-            var sports = new Array();
-            _.forEach(datas, function (data) {
-                var rawSportData = new RawSportData();
-                rawSportData.set("time", new Date(parseInt(data.time) * 1000));
-                rawSportData.set("step", parseInt(data.step));
-                rawSportData.set("heat", parseInt(data.heat));
-                rawSportData.set("distance", parseInt(data.distance));
-                rawSportData.set("band", band);
-                sports.push(rawSportData);
-            });
-
-
-            count = sports.length;
-
-            return commonFunc.promiseWhile(
+        var index = 0;
+        var sports = new Array();
+        _.forEach(sportdata, function (data) {
+            var rawSportData = new RawSportData();
+            rawSportData.set("time", new Date(parseInt(data.time) * 1000));
+            rawSportData.set("step", parseInt(data.step));
+            rawSportData.set("heat", parseInt(data.heat));
+            rawSportData.set("distance", parseInt(data.distance));
+            rawSportData.set("device", deviceInfo);
+            sports.push(rawSportData);
+        });
+        count = sports.length;
+        return commonFunc.promiseWhile(
                 function () {
                     return index < count;
                 },
                 function () {
-                    return insertSportData(index, sports[index], band, req)
+                    return insertSportData(index, sports[index], deviceInfo, req)
                         .then(function (obj) {
                                 index++;
                                 return Parse.Promise.as(index);
@@ -107,21 +84,64 @@ exports.uploadHealthData = function (req, res) {
                                 //res.error(err);
                             });
                 }).then(function () {
-                res.success(index);
-
+                //deal with sleep data
+                if(!sleepdata){
+                    return res.success({ devicename: devicename });
+                }else
+                {
+                    return updateSleepData(sleepdata, deviceInfo).then(function(savedSleepData){
+                        if(savedSleepData)
+                        {
+                            return res.success({ devicename: devicename});
+                        }else{
+                            ParseLogger.log("error", err, { "req": req });
+                            return res.error(errors["internalError"], i18n.__("internalError"));
+                        }
+                    });
+                }
+                
             });
+
         }, function (err) {
             ParseLogger.log("error", err, {"req": req});
             res.error(errors["internalError"], i18n.__("internalError"));
         });
+};
+
+function updateSleepData(sleepdata, deviceinfo){
+    Parse.User.enableUnsafeCurrentUser();
+
+    var getUpPoint = new Date(parseInt(sleepdata.getUpPoint));
+    var dayOfData = _.clone(getUpPoint);
+    dayOfData.setMinutes(0);
+    dayOfData.setHours(0);
+    dayOfData.setSeconds(0);
+    dayOfData.setMilliseconds(0);
+
+    var querySleepData = new Parse.Query(RawSleepData);
+    querySleepData.equalTo('device', deviceinfo);
+    querySleepData.equalTo('day', dayOfData);
+    return querySleepData.first()
+    .then(function (singleSleepData) {
+        if (singleSleepData) {
+            return singleSleepData;
+        }
+
+        var rawSleepData = new RawSleepData();
+        rawSleepData.set("day", dayOfData);
+        rawSleepData.set("gotoSleepPoint", sleepdata.gotoSleepPoint);
+        rawSleepData.set("getUpPoint", sleepdata.getUpPoint);
+        rawSleepData.set("lightSleepTime", sleepdata.lightSleepTime);
+        rawSleepData.set("deepSleepTime", sleepdata.deepSleepTime);
+        rawSleepData.set("wakeupTime", sleepdata.wakeupTime);
+        rawSleepData.set("device", deviceinfo);
+        return rawSleepData.save();
 
     }, function (err) {
-        ParseLogger.log("error", err, {"req": req});
-        res.error(errors[err], i18n.__(err));
-        Parse.Promise.reject("");
-        return;
+        return "internalError";
     });
-};
+}
+
 exports.getHealthData = function (req, res) {
     commonFunc.setI18n(req, i18n);
     var bandName = req.params.bandname;
