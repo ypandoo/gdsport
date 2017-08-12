@@ -17,6 +17,7 @@ const SmsLogs = Parse.Object.extend("smslogs");
 //const PhoneUser = Parse.Object.extend("PhoneUser");
 const RegisterLogs = Parse.Object.extend("registerlogs");
 const BandUser = Parse.Object.extend("BandUser");
+const UserProfile = Parse.Object.extend("UserProfile");
 const User = Parse.Object.extend("_User");
 const Session = Parse.Object.extend("_Session");
 
@@ -58,11 +59,6 @@ exports.signup = function (req, res)  {
     }
     let password = req.params.password;
     let smsCode = req.params.authcode;
-    //let pushId = req.pushid;
-
-    //   if(lang !== undefined && languages.indexOf(lang) != -1) {
-    // 		language = lang;
-    // 	}
 
     if (!phoneNumber || (phoneNumber.length != 11)) {
         ParseLogger.log("warn", i18n.__("invalidPhoneFormat"), {"req": req});
@@ -105,108 +101,11 @@ exports.signup = function (req, res)  {
             res.error(errors["phoneNbExist"], i18n.__("phoneNbExist"));
             reject(i18n.__("phoneNbExist"));
         } else {
-            // let preloadBandQuery = new Parse.Query(PreloadBand);
-            // preloadBandQuery.equalTo("phoneNo", phoneNumber);
-            // return preloadBandQuery.first({useMasterKey: true});
-            //     }
-            // }).then(function (preloadBand) {
-            //     // find if the phone number in the preload files
-            //     if (!preloadBand) {
-            // not defined in the preload band
             // todo create user with phone number directly
             signUpAllNewPhoneUser(req, res, phoneNumber, password);
             reject("user should be created directly");
-            //     } else {
-            //         let bandName = preloadBand.get("bandName");
-            //         let bandUserQuery = new Parse.Query(BandUser);
-            //         bandUserQuery.equalTo("bandName", bandName);
-            //         return bandUserQuery.first({useMasterKey: true});
-            //     }
-            // }).then(function (bandUser) {
-            //     // find if the band user has been registered
-            //     if (!bandUser) {
-            //         // todo create user with phone number directly
-            //         signUpAllNewPhoneUser(req, res, phoneNumber, password);
-            //         reject("user should ve created directly");
-            //     } else {
-            //         let user = bandUser.get("user");
-            //         let bandUserStoken = user.getSessionToken();
-            //         let phoneUser = new PhoneUser();
-            //         phoneUser.set("phoneNo", phoneNumber);
-            //         phoneUser.set("user", user);
-            //         return phoneUser.save(null, {useMasterKey: true});
-            //     }
-            // }).then(function (phoneUser) {
-            //     // create the new phone user
-            //     if (!phoneUser) {
-            //         res.error("create phone user failed");
-            //         reject("create phone user failed");
-            //     } else {
-            //         let modUser = phoneUser.get("user");
-            //         modUser.setPassword(password, {useMasterKey: true});
-            //         return modUser.save(null, {useMasterKey: true})
-            //     }
-            // }).then(function (modUser) {
-            //     // find the modified user
-            //     if (!modUser) {
-            //         res.error("modify the user failed");
-            //         reject("modify the user failed");
-            //     } else {
-            //         retObjectId = modUser.id;
-            //         let fUserQuery = new Parse.Query(Parse.User);
-            //         return fUserQuery.get(retObjectId, {useMasterKey: true});
-            //     }
-            // }).then(function (fUser) {
-            //     if (!fUser) {
-            //         res.error("Cannot find the user");
-            //         reject("cannot find the user");
-            //         return;
-            //     } else {
-            //         sessionToken = fUser.getSessionToken();
-            //         retUserName = fUser.getUsername();
-            //         return storeAfterSignup(req, fUser, fUser.getUsername(), password);
-            //     }
-            // }).then(function (registerLog) {
-            //     // check the register log
-            //     if (!registerLog) {
-            //         res.error("Log the register information failed");
-            //         reject();
-            //     } else {
-            //         registerLog.set("pushId");
-            //         registerLog.save();
-            //         let ret = {};
-            //         ret.sessionToken = sessionToken;
-            //         ret.username = retUserName;
-            //         ret.objectId = retObjectId;
-            //         res.success(ret)
         }
     });
-
-
-    // let query = new Parse.Query(Parse.User);
-    // query.equalTo('username', phoneNumber + "");
-    // query.first({
-    //     useMasterKey: true
-    // }).then(function (result) {
-    //
-    //     if (result) {
-    //         return res.error('phone number has existed');
-    //     } else {
-    //         let user = new Parse.User();
-    //         user.setUsername(phoneNumber);
-    //         user.setPassword(secretPasswordToken + password);
-    //         //			user.set("language", language);
-    //         user.setACL({});
-    //         user.save().then(function () {
-    //             res.success({});
-    //         }, function (err) {
-    //             res.error(err);
-    //         });
-    //     }
-    // }, function (err) {
-    //     res.error(err);
-    // });
-
 };
 
 
@@ -214,8 +113,8 @@ exports.signup = function (req, res)  {
  * just phone user can reset the password
  */
 exports.resetPassword = function (req, res) {
-    commonFunc.setI18n(req);
-    let phoneNumber = req.params.phonenumber;
+    commonFunc.setI18n(req, i18n);
+    let phoneNumber = req.params.phonenum;
     phoneNumber = phoneNumber.replace(/\D/g, '');
 
     if (typeof req.installationId === "undefined" || !req.installationId) {
@@ -224,7 +123,7 @@ exports.resetPassword = function (req, res) {
         return;
     }
     let password = req.params.password;
-    let smsCode = req.params.code;
+    let smsCode = req.params.authcode;
 
     //   if(lang !== undefined && languages.indexOf(lang) != -1) {
     // 		language = lang;
@@ -254,8 +153,8 @@ exports.resetPassword = function (req, res) {
             return;
         } else {
             Parse.Cloud.useMasterKey();
-            let phoneUserQuery = new Parse.Query(PhoneUser);
-            phoneUserQuery.equalTo("phoneNo", phoneNumber.toString());
+            let phoneUserQuery = new Parse.Query(User);
+            phoneUserQuery.equalTo("username", phoneNumber.toString());
             return phoneUserQuery.first({useMasterKey: true});
         }
     }, function (err) {
@@ -268,7 +167,7 @@ exports.resetPassword = function (req, res) {
             res.error(errors["internalError"], i18n.__("internalError"));
             reject("Failed to find out the phone user");
         } else {
-            let prelUser = phUser.get("user");
+            let prelUser = phUser;
             prelUser.setPassword(password);
             return prelUser.save(null, {useMasterKey: true});
         }
@@ -306,31 +205,11 @@ exports.resetPassword = function (req, res) {
             ParseLogger.log("error", "Failed to save the register log", {"req": req});
             res.error(errors["internalError"], i18n.__("internalError"));
         } else {
-            res.success({});
+            res.success({ username: phoneNumber});
         }
     }, function (err) {
         ParseLogger.log("error", err, {"req": req});
     });
-
-// let query = new Parse.Query(Parse.User);
-// query.equalTo('username', phoneNumber + "");
-// query.first().then(function (result) {
-//
-//     if (result) {
-//         result.setPassword(secretPasswordToken + password);
-//         result.save().then(function () {
-//             res.success({});
-//         }, function (err) {
-//             res.error(err);
-//         });
-//
-//     } else {
-//         return res.error('no this user');
-//     }
-// }, function (err) {
-//     res.error(err);
-// });
-
 };
 
 
@@ -370,11 +249,6 @@ exports.signin = function (req, res) {
                 return;
             } else {
                 return phoneUser;
-                /*let username = phoneUser.getUsername();
-                let destUser = phoneUser.get("user");
-                let userId = destUser.id;
-                let parseUserQuery = new Parse.Query(Parse.User);
-                return parseUserQuery.get(userId, {useMasterKey: true});*/
             }
         }, function (err) {
             ParseLogger.log("error", err, {"req": req});
@@ -462,8 +336,6 @@ exports.signout = function (req, res) {
             res.error(errors["internalError"], i18n.__("internalError"));
         });
 
-
-        
         // Parse.User.logOut().then(function (obj) {
         //     res.success({})
         // }, function (err) {
@@ -523,81 +395,20 @@ let signUpAllNewPhoneUser = function (req, res, phoneNo, password) {
     }, function (err) {
         ParseLogger.log("error", err, {"req": req});
         return;
-    });/*.then(function (phoneUser1) {
-        if (!phoneUser1) {
-            ParseLogger.log("error", "Failed to save the phone user", {"req": req});
-            res.error(errors["internalError"], i18n.__("internalError"));
-            reject(i18n.__("internalError"));
-            return;
-        } else {
-            commonFunc.storeAfterLogin(req, user);
-            let ret = {};
-            ret.sessionToken = sessionToken;
-            ret.username = retUserName;
-            ret.objectId = retObjectId;
-            ret.createAt = retCreatedAt;
-            res.success(ret);
-            resolve(regLog);
-        }
-    }, function (errMsg) {
-        ParseLogger.log("error", errMsg, {"req": req});
-        res.error(errors["internalError"], i18n.__("internalError"));
-    });*/
+    });
 };
-
-
-
-/**
- * used to update the push id
- */
-// Parse.Cloud.define("updatePushId", function (req, res) {
-//     commonFunc.setI18n(req, i18n);
-//     if (typeof req.params === "undefined" || typeof req.params.pushid === "undefined"
-//         || typeof req.installationId === "undefined") {
-//         ParseLogger.log("warn", "Req.params or req.params.pushid or req.installationId missied", {"req": req});
-//         res.error(errors["invalidError"], i18n.__("invalidError"));
-//         return;
-//     }
-//     let pushId = req.params.pushid;
-//     commonFunc.isSessionLegal(req, i18n).then(function (regLog) {
-//         if (!regLog) {
-//             ParseLogger.log("warn", "Session is illegal", {"req": req});
-//             res.error(errors["invalidSession"], i18n.__("invalidSession"));
-//             return;
-//         }
-//         regLog.set("pushId", pushId);
-//         regLog.save(null, {useMasterKey: true});
-//         res.success({});
-//         return;
-//     }, function (err) {
-//         ParseLogger.log("error", err, {"req": req});
-//         res.error(errors[err], i18n.__(err));
-//         return;
-//     })
-
-// });
 
 exports.updateUserProfile = function (req, res) {
     commonFunc.setI18n(req, i18n);
-    //var bandName = req.params.bandname;
+
     var phoneNumber = req.params.username;
     var height = req.params.height;
     var sex = req.params.sex;
     var birthdate = req.params.birthdate;
+    var nickname = req.params.nickname;
     var weight = req.params.weight;
     var avatar = req.params.avatar;
     var avatarhash = req.params.avatarhash;
-    //var realname = req.params.realname;
-
-    if (typeof req.params.bandname === "undefined" && typeof req.params.phonenumber === "undefined") {
-        ParseLogger.log("warn", "Not provide the bandname or phonenumber", {"req": req});
-        res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
-        return;
-    }
-    var updateType = "band";
-    if (typeof req.params.bandname === "undefined") {
-        updateType = "phone";
-    }
 
     commonFunc.isSessionLegal(req, i18n).then(function (regLog) {
         if (!regLog) {
@@ -605,19 +416,12 @@ exports.updateUserProfile = function (req, res) {
             res.error(errors["invalidSession"], i18n.__("invalidSession"));
             return;
         } else {
-            Parse.Cloud.useMasterKey();
             Parse.User.enableUnsafeCurrentUser();
             var band;
             var query = null;
-            if (updateType === "band") {
-                query = new Parse.Query(BandUser);
-                query.equalTo('bandName', bandName);
-                query.ascending('createdAt');
-            } else {
-                query = new Parse.Query(PhoneUser);
-                query.equalTo('phoneNo', phoneNumber);
-                query.ascending('createdAt');
-            }
+
+            query = new Parse.Query(Parse.User);
+            query.equalTo('username', phoneNumber);
             query.first({
                 useMasterKey: true
             }).then(function (b) {
@@ -653,13 +457,12 @@ exports.updateUserProfile = function (req, res) {
                         profile.set('weight', parseInt(weight.toString()));
                     if (birthdate)
                         profile.set('birthdate', birthdate.toString());
-                    if (realname) {
-                        profile.set('realname', realname.toString());
-                    }
+                    if (nickname) 
+                        profile.set('nickname', nickname.toString());
+                     
                     if (avatarhash && avatar) {
                         profile.set('avatar', avatar.toString());
                         profile.set('avatarhash', parseInt(avatarhash.toString()));
-
                     }
                     return profile.save(null, {useMasterKey: true});
                 } else {
@@ -670,7 +473,7 @@ exports.updateUserProfile = function (req, res) {
                 ParseLogger.log("error", err, {"req": req});
                 res.error(errors["internalError"], i18n.__("internalError"));
             }).then(function (profile) {
-                res.success({});
+                res.success({ 'username': phoneNumber});
             }, function (err) {
                 ParseLogger.log("error", err, {"req": req});
                 res.error(errors[err], i18n.__(err));
@@ -684,25 +487,9 @@ exports.updateUserProfile = function (req, res) {
 };
 exports.getUserProfile =  function (req, res) {
     commonFunc.setI18n(req, i18n);
-    var bandName = req.params.bandname;
-    var userName = req.params.username;
-    var phoneNumber = req.params.phonenumber;
+    var phoneNumber = req.params.username;
     var avatarhash = req.params.avatarhash;
     var band;
-    if (!bandName && !phoneNumber) {
-        ParseLogger.log("warn", "Not provide the bandName or phoneName", {"req": req});
-        res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
-        return;
-    }
-    if (typeof req.params.bandname === "undefined" && typeof req.params.phonenumber === "undefined") {
-        ParseLogger.log("warn", "Not provide the bandname or phonenumber", {"req": req});
-        res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
-        return;
-    }
-    var updateType = "band";
-    if (typeof req.params.bandname === "undefined") {
-        updateType = "phone";
-    }
 
     commonFunc.isSessionLegal(req, i18n).then(function (regLog) {
         if (!regLog) {
@@ -710,18 +497,10 @@ exports.getUserProfile =  function (req, res) {
             res.error(errors["invalidSession"], i18n.__("invalidSession"));
             return;
         } else {
-            Parse.Cloud.useMasterKey();
             Parse.User.enableUnsafeCurrentUser();
             var query = null;
-            if (updateType === "band") {
-                query = new Parse.Query(BandUser);
-                query.equalTo('bandName', bandName);
-                query.ascending('createdAt');
-            } else {
-                query = new Parse.Query(PhoneUser);
-                query.equalTo('phoneNo', phoneNumber);
-                query.ascending('createdAt');
-            }
+            query = new Parse.Query(User);
+            query.equalTo('username', phoneNumber);
             query.first({
                 useMasterKey: true
             }).then(function (b) {
@@ -757,16 +536,17 @@ exports.getUserProfile =  function (req, res) {
                         realname: ""
                     });
                 } else {
-                    var finalRealName = (typeof profile.get('realname') === "undefined") ? "" : profile.get('realname');
+                    var nickname = (typeof profile.get('nickname') === "undefined") ? "" : profile.get('nickname');
                     res.success({
-                        name: band.get('bandName'),
-                        city: '上海',
+                        username: phoneNumber,
+                        //city: '上海',
                         height: typeof profile.get('height') === "undefined" ? "" : profile.get('height'),
                         birthdate: typeof profile.get('birthdate') === "undefined" ? "" : profile.get('birthdate'),
                         sex: typeof profile.get('sex') === "undefined" ? "" : profile.get('sex'),
                         weight: typeof profile.get('weight') === "undefined" ? "" : profile.get('weight'),
                         avatar: profile.get('avatarhash') === avatarhash ? "" : profile.get('avatar'),
-                        realname: finalRealName
+                        avatarhash: profile.get('avatarhash') === "undefined" ? "" : profile.get('avatarhash'),
+                        nickname: nickname
 
                     })
                     ;

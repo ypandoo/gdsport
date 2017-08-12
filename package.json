@@ -37,7 +37,7 @@
   },
   "scripts": {
     "start": "node index.js",
-    "start_local": "GDSPORT2_ENV=lcaol GDSPORT2_DB_ENV=local-db node index.js"
+    "start_local": "GDSPORT2_ENV=local GDSPORT2_DB_ENV=local-db node index.js"
   },
   "engines": {
     "node": ">=4.3"

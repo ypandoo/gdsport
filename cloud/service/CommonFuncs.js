@@ -9,6 +9,9 @@ let SmsService = require("../tools/dahansms_service-proxy");
 let _ = require("lodash");
 let PushService = require('../tools/j_push_service-proxy');
 const ParseLogger = require('../../parse-server').logger;
+var Crypto = require("crypto");
+var EncKey = '1122334455667788';
+var EncIV = '8877665544332211';
 
 
 let CommonFuncs = {
@@ -50,8 +53,15 @@ let CommonFuncs = {
         return promise;
     },
     isSessionLegal: function (req, i18n) {
+        
+
         this.setI18n(req, i18n);
         let promise = new Parse.Promise(function (resolve, reject) {
+
+            //to do: temporory disable session 
+            resolve("temp pass");
+            return;
+
             if (typeof req.user === "undefined") {
                 reject("noSessionUser");
                 return;
@@ -270,7 +280,7 @@ let CommonFuncs = {
         registerLogsQuery.equalTo("installationId", installationId);
         registerLogsQuery.first({ useMasterKey: true }).then(function (registerLog) {
             if (!registerLog) {
-                let registerLog = new RegisterLogs();
+                registerLog = new RegisterLogs();
                 registerLog.set("installationId", installationId);
                 registerLog.set("pushId", "");
                 registerLog.set("username", user.getUsername());
@@ -476,7 +486,23 @@ let CommonFuncs = {
         loop();
 
         return promise;
-    }
+    },
+
+    //
+    doEncrypt: function (data) {
+        var cipher = Crypto.createCipheriv('aes-128-cbc', EncKey, EncIV);
+        var crypted = cipher.update(data, 'utf8', 'binary');
+        crypted += cipher.final('binary');
+        crypted = new Buffer(crypted, 'binary').toString('base64');
+        return crypted;
+    },
+    doDecrypt: function (data) {
+        var crypted = new Buffer(data, "base64").toString('binary');
+        var decipher = Crypto.createDecipheriv('aes-128-cbc', EncKey, EncIV);
+        var decrypted = decipher.update(crypted, 'binary', 'utf8');
+        decrypted += decipher.final('utf8');
+        return decrypted;
+    },
 
 };
 

@@ -18,16 +18,13 @@ var RawSportData = Parse.Object.extend("RawSportData");
 var SportDataOfDay = Parse.Object.extend("SportDataOfDay");
 var SportDataOfHour = Parse.Object.extend("SportDataOfHour");
 
-
-
-
 exports.uploadHealthData = function (req, res) {
     commonFunc.setI18n(req, i18n);
-    var bandName = req.params.bandname;
+    var bandName = req.params.devicename;
     var datas = req.params.data;
-    var uptime = req.params.uptime;
-    var mac = req.params.mac;
-    if (!bandName || !datas || !uptime || !mac) {
+    var uptime = req.params.uploadtime;
+    // var mac = req.params.mac;
+    if (!bandName || !datas || !uptime ) {
         ParseLogger.log("warn", "No bandName or datas set in the param", {"req": req});
         res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
         return;

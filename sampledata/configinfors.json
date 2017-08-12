@@ -1,0 +1,31 @@
+db.configinfos.save({"_id":"30qrAaJQ01","name":"电子现金适用城市","value":"[\"北京\",\"上海\"]","alias":"ECashCity"});
+db.configinfos.save({"_id":"sLqsjZc1dh","name":"手环信息导入配置","value":"[\"phoneNo\",\"bandName\",\"cardName\",\"name\"]","alias":"FactoryImport"});
+db.configinfos.save({"_id":"3jQ15DTNho","name":"不支持升级版本号","value":"[]","alias":"UnsupportUpdateVersion"});
+db.configinfos.save({"_id":"BvRKuegdly","name":"开启BankWorld功能","value":"1","alias":"SwitchOnBankWorld"});
+db.configinfos.save({"_id":"PoBhOuOZdR","name":"强制升级","value":"1","alias":"ForceUpdate"});
+db.configinfos.save({"_id":"cSlgtuRi7i","name":"保持蓝牙连接","value":"1","alias":"RetainBleConn"});
+
+db.configinfos.save({"_id":"oGNn6WMhNJ","name":"清除运动数据","value":"0","alias":"ClearSportData"});
+db.configinfos.save({"_id":"nAa31QPwdY","name":"短信验证码有效期","value":"86400","alias":"SmsExpiration"});
+db.configinfos.save({"_id":"MrExaKctWm","name":"清除运动数据周期","value":"3600","alias":"ClearSportInterval"});
+db.configinfos.save({"_id":"bKab6EYpaM","name":"运动数据上传间隔","value":"86400","alias":"SportUploadInterval"});
+db.configinfos.save({"_id":"3IK6xEFYO8","name":"电话号码隐藏位数","value":"7","alias":"PhoneNoHidden"});
+db.configinfos.save({"_id":"BQm4A0QS15","name":"短信验证码限制","value":"[60,20]","alias":"SmsConstraint"});
+
+db.configinfos.save({"_id":"VD2DYwZ3xV","name":"手环绑定限制","value":"[200,20000]","alias":"BindBandConstraint"});
+db.configinfos.save({"_id":"kmSSClAhBo","name":"是否允许修改用户姓名","value":"0","alias":"ModifySupportUserName"});
+db.configinfos.save({"_id":"uOhug3sFav","name":"是否允许用户异地登录","value":"1","alias":"ConcurrentUser"});
+db.configinfos.save({"_id":"9VIZaEA5t5","name":"是否收集上传用户行为数据","value":"1","alias":"BehaveTrace"});
+db.configinfos.save({"_id":"P4sXvDoipg","name":"是否上传日志","value":"1","alias":"LogsUpload"});
+db.configinfos.save({"_id":"mTnpoNo5JV","name":"客户端时间允许误差","value":"600","alias":"AppTimeThreshold"});
+db.configinfos.save({"_id":"h4jn9OwmOH","name":"实时运动数据刷新间隔","value":"300","alias":"SportDataRefresh"});
+
+db.getCollection('_SCHEMA').save({
+  "_id": "configinfos",
+  "objectId": "string",
+  "updatedAt": "date",
+  "createdAt": "date",
+  "name": "string",
+  "value": "string",
+  "alias": "string"
+});
