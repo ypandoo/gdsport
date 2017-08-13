@@ -18,6 +18,7 @@ var RawSleepData = Parse.Object.extend("RawSleepData");
 var DeviceInfos = Parse.Object.extend("deviceinfos");
 const ParseLogger = require('../../parse-server').logger;
 
+//merged interface
 exports.uploadHealthData = function (req, res) {
     commonFunc.setI18n(req, i18n);
     var devicename = req.params.devicename;
@@ -89,7 +90,7 @@ exports.uploadHealthData = function (req, res) {
                     return res.success({ devicename: devicename });
                 }else
                 {
-                    return updateSleepData(sleepdata, deviceInfo).then(function(savedSleepData){
+                    return updateSleepDataL(sleepdata, deviceInfo).then(function(savedSleepData){
                         if(savedSleepData)
                         {
                             return res.success({ devicename: devicename});
@@ -108,7 +109,133 @@ exports.uploadHealthData = function (req, res) {
         });
 };
 
-function updateSleepData(sleepdata, deviceinfo){
+//Upload sport data
+exports.uploadSportData = function (req, res) {
+    commonFunc.setI18n(req, i18n);
+    var devicename = req.params.devicename;
+    var sportdata = req.params.sportdata;
+    var uptime = req.params.uploadtime;
+
+    // var mac = req.params.mac;
+    if (!devicename || !uptime || !sportdata) {
+        ParseLogger.log("warn", "No devicename ,times, sportdata set in the param", { "req": req });
+        res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
+        return;
+    }
+    commonFunc.isSessionLegal(req, i18n).then(function (regLog) {
+        if (!regLog) {
+            ParseLogger.log("warn", "Failed to valid from the register log ", { "req": req });
+            res.error(errors["invalidSession"], i18n.__("invalidSession"));
+            Parse.Promise.reject("");
+            return;
+        } else {
+            var deviceQuery = new Parse.Query(DeviceInfos);
+            deviceQuery.equalTo("devicename", devicename);
+            return deviceQuery.first();
+        }
+    }, function (err) {
+        ParseLogger.log("error", err, { "req": req });
+        res.error(errors[err], i18n.__(err));
+        return reject("");
+    }).then(function (deviceInfo) {
+        if (!deviceInfo) {
+            ParseLogger.log("error", err, { "req": req });
+            res.error(errors[err], i18n.__('DeviceNotFound'));
+            return reject("");
+        }
+
+        //Sport data
+        var count = 0;
+        var index = 0;
+        var sports = new Array();
+        _.forEach(sportdata, function (data) {
+            var rawSportData = new RawSportData();
+            rawSportData.set("time", new Date(parseInt(data.time) * 1000));
+            rawSportData.set("step", parseInt(data.step));
+            rawSportData.set("heat", parseInt(data.heat));
+            rawSportData.set("distance", parseInt(data.distance));
+            rawSportData.set("device", deviceInfo);
+            sports.push(rawSportData);
+        });
+        count = sports.length;
+        return commonFunc.promiseWhile(
+            function () {
+                return index < count;
+            },
+            function () {
+                return insertSportData(index, sports[index], deviceInfo, req)
+                    .then(function (obj) {
+                        index++;
+                        return Parse.Promise.as(index);
+                    },
+                    function (err) {
+                        index++;
+                        return Parse.Promise.as(index);
+                        //res.error(err);
+                    });
+            }).then(function () {
+                    return res.success({ devicename: devicename });
+            });
+
+    }, function (err) {
+        ParseLogger.log("error", err, { "req": req });
+        res.error(errors["internalError"], i18n.__("internalError"));
+    });
+};
+
+//upload sleep data
+exports.uploadSleepData = function (req, res) {
+    commonFunc.setI18n(req, i18n);
+    var devicename = req.params.devicename;
+    var sleepdata = req.params.sleepdata;
+    var uptime = req.params.uploadtime;
+
+    // var mac = req.params.mac;
+    if (!devicename || !uptime || !sleepdata) {
+        ParseLogger.log("warn", "No devicename ,times, sleepdata set in the param", { "req": req });
+        res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
+        return;
+    }
+    commonFunc.isSessionLegal(req, i18n).then(function (regLog) {
+        if (!regLog) {
+            ParseLogger.log("warn", "Failed to valid from the register log ", { "req": req });
+            res.error(errors["invalidSession"], i18n.__("invalidSession"));
+            Parse.Promise.reject("");
+            return;
+        } else {
+            var deviceQuery = new Parse.Query(DeviceInfos);
+            deviceQuery.equalTo("devicename", devicename);
+            return deviceQuery.first();
+        }
+    }, function (err) {
+        ParseLogger.log("error", err, { "req": req });
+        res.error(errors[err], i18n.__(err));
+        return reject("");
+    }).then(function (deviceInfo) {
+        if (!deviceInfo) {
+            ParseLogger.log("error", err, { "req": req });
+            res.error(errors[err], i18n.__('DeviceNotFound'));
+            return reject("");
+        }
+
+        return updateSleepDataL(sleepdata, deviceinfo).then(
+            function(savedSleepData){
+                return res.success({ devicename: devicename });
+            },
+            function (err) {
+                ParseLogger.log("error", err, { "req": req });
+                res.error(errors[err], i18n.__(err));
+                return reject(err);
+            }
+        );
+    }, function (err) {
+        ParseLogger.log("error", err, { "req": req });
+        res.error(errors["internalError"], i18n.__("internalError"));
+    });
+};
+
+//internal update sleep data
+function updateSleepDataL(sleepdata, deviceinfo){
     Parse.User.enableUnsafeCurrentUser();
 
     var getUpPoint = new Date(parseInt(sleepdata.getUpPoint));
@@ -142,49 +269,56 @@ function updateSleepData(sleepdata, deviceinfo){
     });
 }
 
-exports.getHealthData = function (req, res) {
+//get sport data of hour
+exports.getSportDataOfDay = function (req, res) {
     commonFunc.setI18n(req, i18n);
-    var bandName = req.params.bandname;
+    var devicename = req.params.devicename;
     var startDate = req.params.startdate;
     var endDate = req.params.enddate;
-    var band;
-    if (!bandName || !startDate || !endDate) {
-        ParseLogger.log("warn", "Not provide the bandName or start Date or end date", {"req": req});
+    var deviceInfoLocal;
+    if (!devicename || !startDate || !endDate) {
+        ParseLogger.log("warn", "Not provide the devicename or start Date or end date", { "req": req });
         res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
         return;
     }
 
     commonFunc.isSessionLegal(req, i18n).then(function (regLog) {
         if (!regLog) {
-            ParseLogger.log("warn", "Failed to valid from the register log", {"req": req});
+            ParseLogger.log("warn", "Failed to valid from the register log", { "req": req });
             res.error(errors["internalError"], i18n.__("internalError"));
             return;
         } else {
             Parse.Cloud.useMasterKey();
             Parse.User.enableUnsafeCurrentUser();
-            var query = new Parse.Query(BandUser);
-            query.equalTo('bandName', bandName);
-            query.ascending('createdAt');
-
-
-            query.first({
-                useMasterKey: true
-            }).then(function (b) {
+            var query = new Parse.Query(DeviceInfos);
+            query.equalTo('devicename', devicename);
+            query.first()
+            .then(function (deviceInfo) {
                 // If not, create a new user.
-                if (!b) {
-                    ParseLogger.log("warn", "Cannot find the bind", {"req": req});
-                    return res.error(errors["noBandFound"], i18n.__("noBandFound"));
+                if (!deviceInfo) {
+                    ParseLogger.log("warn", "Cannot find the device", { "req": req });
+                    return res.error(errors["noDeviceFound"], i18n.__("noDeviceFound"));
                 }
-                band = b;
+                deviceInfoLocal = deviceInfo;
                 var querySportDataOfDay = new Parse.Query(SportDataOfDay);
-                querySportDataOfDay.equalTo('band', b);
+                querySportDataOfDay.equalTo('device', deviceInfo);
                 querySportDataOfDay.greaterThanOrEqualTo('day', new Date(startDate * 1000));
                 querySportDataOfDay.lessThanOrEqualTo('day', new Date(endDate * 1000));
-                return querySportDataOfDay.find({
+                return querySportDataOfDay.count();
+            }, function (err) {
+                ParseLogger.log("error", err, { "req": req });
+                res.error(errors["internalError"], i18n.__("internalError"));
+            }).then(function (dataCounts) {
+                // If not, create a new user.
+                var querySportDataOfDay = new Parse.Query(SportDataOfDay);
+                querySportDataOfDay.equalTo('device', deviceInfoLocal);
+                querySportDataOfDay.greaterThanOrEqualTo('day', new Date(startDate * 1000));
+                querySportDataOfDay.lessThanOrEqualTo('day', new Date(endDate * 1000));
+                return querySportDataOfDay.limit(dataCounts).find({
                     useMasterKey: true
                 });
             }, function (err) {
-                ParseLogger.log("error", err, {"req": req});
+                ParseLogger.log("error", err, { "req": req });
                 res.error(errors["internalError"], i18n.__("internalError"));
             }).then(function (list) {
                 if (!list) {
@@ -203,58 +337,53 @@ exports.getHealthData = function (req, res) {
                 res.success(ret);
 
             }, function (err) {
-                ParseLogger.log("error", err, {"req": req});
+                ParseLogger.log("error", err, { "req": req });
                 res.error(errors["internalError"], i18n.__("internalError"));
             });
         }
     }, function (err) {
-        ParseLogger.log("error", err, {"req": req});
+        ParseLogger.log("error", err, { "req": req });
         res.error(errors[err], i18n.__(err));
         return;
     });
 };
 
-let getSportDataOfHour =  function (req, res) {
+exports.getSportDataOfHour = function (req, res) {
     commonFunc.setI18n(req, i18n);
-    var bandName = req.params.bandname;
+    var devicename = req.params.devicename;
     var date = req.params.date;
-    var band;
-    if (!bandName || !date) {
-        ParseLogger.log("warn", "Not provide the bandName or date", {"req": req});
+    var deviceInfoLocal;
+    if (!devicename || !date) {
+        ParseLogger.log("warn", "Not provide the devicename or date", { "req": req });
         res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
         return;
     }
 
     commonFunc.isSessionLegal(req, i18n).then(function (regLog) {
         if (!regLog) {
-            ParseLogger.log("warn", "Failed to valid from the register log", {"req": req});
+            ParseLogger.log("warn", "Failed to valid from the register log", { "req": req });
             res.error(errors["invalidSession"], i18n.__("invalidSession"));
             return;
         } else {
-            Parse.Cloud.useMasterKey();
             Parse.User.enableUnsafeCurrentUser();
-            var query = new Parse.Query(BandUser);
-            query.equalTo('bandName', bandName);
-            query.ascending('createdAt');
-
-
-            query.first({
-                useMasterKey: true
-            }).then(function (b) {
+            var query = new Parse.Query(DeviceInfos);
+            query.equalTo('devicename', devicename);
+            query.first()
+            .then(function (deviceInfo) {
                 // If not, create a new user.
-                if (!b) {
-                    ParseLogger.log("warn", "Failed to find the band ", {"req": req});
-                    return res.error(errors["noBandFound"], i18n.__("noBandFound"));
+                if (!deviceInfo) {
+                    ParseLogger.log("warn", "Failed to find the device ", { "req": req });
+                    return res.error(errors["noDeviceFound"], i18n.__("noDeviceFound"));
                 }
-                band = b;
+                deviceInfoLocal = deviceInfo;
                 var querySportDataOfHour = new Parse.Query(SportDataOfHour);
-                querySportDataOfHour.equalTo('band', b);
+                querySportDataOfHour.equalTo('device', deviceInfo);
                 querySportDataOfHour.equalTo('day', new Date(date * 1000));
                 return querySportDataOfHour.first({
                     useMasterKey: true
                 });
             }, function (err) {
-                ParseLogger.log("error", err, {"req": req});
+                ParseLogger.log("error", err, { "req": req });
                 res.error(errors["internalError"], i18n.__("internalError"));
             }).then(function (sportDataOfHour) {
                 if (!sportDataOfHour) {
@@ -272,19 +401,17 @@ let getSportDataOfHour =  function (req, res) {
                 res.success(ret);
 
             }, function (err) {
-                ParseLogger.log("error", err, {"req": req});
+                ParseLogger.log("error", err, { "req": req });
                 res.error(errors["internalError"], i18n.__("internalError"));
                 return;
             });
         }
     }, function (err) {
-        ParseLogger.log("error", err, {"req": req});
+        ParseLogger.log("error", err, { "req": req });
         res.error(errors[err], i18n.__(err));
         return;
     });
 };
-
-
 
 
 var insertSportData = function (index, sportData, band, req) {
