@@ -27,7 +27,7 @@ RebootCntTool.initRebootCnt("" + "RebootCounter.json", function (cnt) {
 
 var app = express();
 
-
+app.use("/", fakeParseHeader);
 app.use("/", addUniqId);
 
 var api = new ParseServer({
@@ -82,6 +82,15 @@ function addUniqId(req, res, next) {
     next();
 };
 
+function fakeParseHeader(req, res, next) {
+
+    req.headers["x-parse-application-id"] = req.headers['x-gdsport-application-id'];
+    req.headers["x-parse-client-key"] = req.headers['x-gdsport-api-key'];;
+    req.headers["x-parse-installation-id"] = req.headers['x-gdsport-installation-id'];
+
+    next();
+};
+
 
 // // Serve static assets from the /public folder
 // app.use('/public', express.static(path.join(__dirname, '/public')));
@@ -102,6 +111,7 @@ app.all("*", function (req, res, next) {
     req.cibParse.serverURL = cfg.server_url;
     next();
 });
+
 if(!cfg.disable_adminui){
     app.use("/adminui", require("./adminui/main"));
 }

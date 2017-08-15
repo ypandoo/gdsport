@@ -54,29 +54,28 @@ let CommonFuncs = {
     },
     isSessionLegal: function (req, i18n) {
         
-
         this.setI18n(req, i18n);
         let promise = new Parse.Promise(function (resolve, reject) {
 
             //to do: temporory disable session 
-            resolve("temp pass");
-            return;
+            //resolve("temp pass");
+            //return;
 
-            if (typeof req.user === "undefined") {
-                reject("noSessionUser");
+            var sessionToken = req.headers['x-gdsport-session-token'];
+            if (typeof sessionToken === "undefined") {
+                reject("noSessionToken");
                 return;
-
             }
+
             if (typeof req.installationId === "undefined") {
                 reject("noInstallationId");
                 return;
             }
-            Parse.Cloud.useMasterKey();
-            if (typeof req.user.getSessionToken() === "undefined") {
-                reject("noSessionToken");
-                return;
-            }
-            let sessionToken = req.user.getSessionToken();
+            // Parse.Cloud.useMasterKey();
+            // if (typeof req.user.getSessionToken() === "undefined") {
+            //     reject("noSessionToken");
+            //     return;
+            // }
             let installationId = req.installationId;
             let registerLogsQuery = new Parse.Query(RegisterLogs);
             registerLogsQuery.equalTo("sessionToken", sessionToken);

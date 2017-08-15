@@ -1,7 +1,3 @@
-/**
- * Created by yuhailong on 07/04/2017.
- */
-
 var _ = require('lodash');
 var i18n = require('i18n');
 i18n.configure({
@@ -11,11 +7,11 @@ var errors = require("../errcode.js");
 const ParseLogger = require('../../parse-server').logger;
 const commonFunc = require("./CommonFuncs");
 var ConfigInfos = Parse.Object.extend("configinfos");
-//var BandUser = Parse.Object.extend("BandUser");
-//var ActivityInfos = Parse.Object.extend("activityinfos");
-//var GuideInfos = Parse.Object.extend("guideinfos");
 var AppVersions = Parse.Object.extend("versioninfos");
 
+const cfg = require('../../config/index');
+var request = require('request');
+const uuidV4 = require('uuid/v4');
 
 exports.getAppVersions = function (req, res) {
     commonFunc.setI18n(req, i18n);
@@ -50,9 +46,71 @@ exports.getAppVersions = function (req, res) {
     });
 };
 
-exports.uploadEvents = function (req, res) { };
-exports.instantiateApp = function (req, res) { };
-exports.updateInstance = function (req, res) { };
+exports.uploadEvents = function (req, res) {
+
+ };
+
+ 
+exports.instantiateApp = function (req, res) { 
+    
+    //
+    commonFunc.setI18n(req, i18n);
+    
+    const devicetype = req.params.devicetype;
+    const devicetoken = req.params.devicetoken;
+
+    if (!devicetype || !devicetoken ) {
+        ParseLogger.log("warn", "Not provide devicetoken or devicetype", { "req": req });
+        return res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
+    }
+
+    //request from parseserver
+    var url = cfg.server_url + '/installations';
+    const uuid = uuidV4();
+    var options = {
+        url: url,
+        method: 'POST',
+        json: true,
+        headers: {
+            'User-Agent': 'request',
+            'x-gdsport-api-key': req.headers['x-gdsport-api-key'],
+            'x-gdsport-application-id': req.headers['x-gdsport-application-id'],
+            'Content-Type':"application/json"
+        },
+        body:{
+            "deviceType": req.params.devicetype,
+            "deviceToken": req.params.devicetoken,
+            "appversion": req.params.appversion,
+            "appIdentifier": req.params.appIdentifier,
+            "appname": req.params.appname,
+            "osversion": req.params.osversion,
+            "device": req.params.device,
+            "pushtype": req.params.devicetoken,
+            "installationId": uuid
+        }
+    };
+
+    request.post(options, function (error, response, body) {
+        
+        if(!error && body && body.objectId)
+        {
+            var ret = {};
+            ret.installationId = uuid;
+            return res.success(ret);        
+        }else{
+            ParseLogger.log("error", err, { "req": req });
+            return res.error(errors["internalError"], i18n.__("internalError"));
+        }
+    })
+};
+
+
+exports.updateInstance = function (req, res) { 
+    
+
+};
+
+
 exports.sendSMSCode = function (req, res) {
     commonFunc.setI18n(req, i18n);
     const phoneNumber = req.params.phonenum;

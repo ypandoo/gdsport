@@ -68,7 +68,7 @@ Parse.Cloud.define("uploadSportData", HealthService.uploadSportData);
 Parse.Cloud.define("uploadSleepData", HealthService.uploadSleepData);
 Parse.Cloud.define("getSportDataOfDay", HealthService.getSportDataOfDay);
 Parse.Cloud.define("getSportDataOfHour", HealthService.getSportDataOfHour);
-Parse.Cloud.define("getAlgSleepData", HealthService.getAlgSleepData);
+Parse.Cloud.define("getSleepData", HealthService.getSleepData);
 
 Parse.Cloud.define("testLog", function (req, res) {
     var message = {

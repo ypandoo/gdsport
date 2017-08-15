@@ -218,7 +218,7 @@ exports.uploadSleepData = function (req, res) {
             return reject("");
         }
 
-        return updateSleepDataL(sleepdata, deviceinfo).then(
+        return updateSleepDataL(sleepdata, deviceInfo).then(
             function(savedSleepData){
                 return res.success({ devicename: devicename });
             },
@@ -490,5 +490,74 @@ var insertSportData = function (index, sportData, band, req) {
         });
     }, function (err) {
         ParseLogger.log("error", err, {"req": req});
+    });
+};
+
+exports.getSleepData = function (req, res) {
+    commonFunc.setI18n(req, i18n);
+    var devicename = req.params.devicename;
+    var startDate = req.params.startdate;
+    var endDate = req.params.enddate;
+
+    var deviceInfoLocal;
+    if (!devicename || !startDate || !endDate) {
+        ParseLogger.log("warn", "Not provide devicename or startDate or endDate", { "req": req });
+        res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
+        return;
+    }
+
+    commonFunc.isSessionLegal(req, i18n).then(function (regLog) {
+        if (!regLog) {
+            ParseLogger.log("warn", "Failed to valid from register log", { "req": req });
+            res.error(errors["invalidSession"], i18n.__("invalidSession"));
+            return;
+        } else {
+            Parse.User.enableUnsafeCurrentUser();
+            var query = new Parse.Query(DeviceInfos);
+            query.equalTo('devicename', devicename);
+            query.first()
+            .then(function (deviceInfo) {
+                // If not, create a new user.
+                if (!deviceInfo) {
+                    ParseLogger.log("warn", "Cannot find the deviceInfo", { "req": req });
+                    return res.error(errors["noDeviceFound"], i18n.__("noDeviceFound"));
+                }
+                deviceInfoLocal = deviceInfo;
+                var querySleepData = new Parse.Query(RawSleepData);
+                querySleepData.equalTo('device', deviceInfo);
+                querySleepData.greaterThanOrEqualTo('day', new Date(startDate * 1000));
+                querySleepData.lessThanOrEqualTo('day', new Date(endDate * 1000));
+                return querySleepData.limit(10000).find({
+                    useMasterKey: true
+                });
+            }, function (e) {
+                ParseLogger.log("error", e, { "req": req });
+                res.error(errors["internalError"], i18n.__("internalError"));
+            }).then(function (list) {
+                if (!list) {
+                    return res.success([]);
+                }
+                var ret = new Array();
+                _.forEach(list, function (rawSleepData) {
+                    ret.push({
+                        time: Math.round(rawSleepData.get("day").getTime() / 1000),
+                        gotoSleepPoint: rawSleepData.get("gotoSleepPoint"),
+                        getUpPoint: rawSleepData.get("getUpPoint"),
+                        lightSleepTime: rawSleepData.get("lightSleepTime"),
+                        deepSleepTime: rawSleepData.get("deepSleepTime"),
+                        wakeupTime: rawSleepData.get("wakeupTime")
+                    });
+
+                });
+                return res.success(ret);
+
+            }, function (err) {
+                ParseLogger.log("error", err, { "req": req });
+                return res.error(errors["internalError"], i18n.__("internalError"));
+            });
+        }
+    }, function (err) {
+        ParseLogger.log("error", err, { "req": req });
+        return res.error(errors[err], i18n.__(err));
     });
 };
