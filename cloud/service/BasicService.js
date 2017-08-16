@@ -67,13 +67,16 @@ exports.instantiateApp = function (req, res) {
 
     const devicetype = req.params.devicetype;
     const appversion = req.params.appversion;
-    const appIdentifier = req.params.appIdentifier;
+    const appidentifier = req.params.appidentifier;
     const appname = req.params.appname;
     const osversion = req.params.osversion;
-    const devicename = req.params.devicename;
+    const device = req.params.device;
+
+    //optional
+    const pushtype = req.params.pushtype;
     const devicetoken = req.params.devicetoken;
 
-    if (!appversion || !appIdentifier || !appname || !osversion || !devicename || !devicetype ) {
+    if (!appversion || !appidentifier || !appname || !osversion || !device || !devicetype ) {
         ParseLogger.log("warn", "Not provide enough parameters.Please check", { "req": req });
         return res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
     }
@@ -93,14 +96,14 @@ exports.instantiateApp = function (req, res) {
         },
         body:{
             "deviceType": req.params.devicetype,
-            "devicetoken": req.params.devicetoken,
             "appversion": req.params.appversion,
             "appidentifier": req.params.appidentifier,
             "appname": req.params.appname,
             "osversion": req.params.osversion,
-            "devicename": req.params.devicename,
-            "pushtype": req.params.devicetoken,
-            "installationId": uuid
+            "device": req.params.device,
+            "installationId": uuid,
+            "devicetoken": devicetoken,
+            "pushtype": pushtype
         }
     };
 
@@ -122,62 +125,51 @@ exports.instantiateApp = function (req, res) {
 exports.updateInstance = function (req, res) { 
     //
     commonFunc.setI18n(req, i18n);
-
-    const devicename = req.params.devicename;
-    if (!devicename) {
-        ParseLogger.log("warn", "Not provide devicename", { "req": req });
-        return res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
-    }
-
-    const appversion = req.params.appversion;
-    const appname = req.params.appname;
-    const osversion = req.params.osversion;
+    const installationId = req.installationId;
     const pushtype = req.params.pushtype;
     const devicetoken = req.params.devicetoken;
 
-    Parse.User.enableUnsafeCurrentUser();
+    if (!installationId || !pushtype || !devicetoken) {
+        ParseLogger.log("warn", "Not provide installationId, pushtype or devicetoken", { "req": req });
+        return res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
+    }
+
     var query = new Parse.Query(Parse.Installation);
-    query.equalTo('devicename', devicename);
+    query.equalTo('installationId', installationId);
     query.descending('createdAt');
     query.first({
         useMasterKey: true
     }).then(function (singleInstallation) {
         if(singleInstallation)
         {
-            if(appversion){
-                singleInstallation.set("appversion",appversion);
-            }
-            if (appname) {
-                singleInstallation.set("appname", appname);
-            }
-            if (osversion) {
-                singleInstallation.set("osversion", osversion);
-            }
-            if (pushtype) {
-                singleInstallation.set("pushtype", pushtype);
-            }
-            if (devicetoken) {
-                singleInstallation.set("devicetoken", devicetoken);
+            var storedDeviceType = singleInstallation.get('pushtype');
+            var storedDeviceToken = singleInstallation.get('devicetoken');
+            if(storedDeviceToken || storedDeviceType)
+            {
+                ParseLogger.log("warn", "NoPermissionUpdateInstallationInfo", { "req": req });
+                return res.error(errors["internalError"], i18n.__("NoPermissionUpdateInstallationInfo"));
             }
 
+            singleInstallation.set("pushtype", pushtype);
+            singleInstallation.set("devicetoken", devicetoken);
             singleInstallation.save().then(function(saved){
                 if(saved)
                 {
                     var ret = {};
-                    ret.devicename = devicename;
+                    ret.installationId = installationId;
                     return res.success(ret);  
                 }else{
-                    ParseLogger.log("error", err, { "req": req });
+                    ParseLogger.log("warn", "internalError", { "req": req });
                     return res.error(errors["internalError"], i18n.__("internalError"));
                 }
             },
             function(err){
-                ParseLogger.log("error", err, { "req": req });
+                ParseLogger.log("warn", "internalError", { "req": req });
                 return res.error(errors["internalError"], i18n.__("internalError"));
             })
 
         }else{
-            ParseLogger.log("warn", "No device found", { "req": req });
+            ParseLogger.log("warn", "noDeviceFound", { "req": req });
             return res.error(errors["noDeviceFound"], i18n.__("noDeviceFound"));        
         }
     });
