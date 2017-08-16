@@ -29,5 +29,6 @@
 	"invalidMac": "Invalid MAC for uploading sport data",
 	"invalidTimestamp": "Client time error",
 	"noLocalTime": "The app local time is missed",
-	"Device exists": "Device exists"
+	"Device exists": "Device exists",
+	"noDeviceFound": "noDeviceFound"
 }

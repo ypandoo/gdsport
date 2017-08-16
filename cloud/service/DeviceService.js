@@ -110,15 +110,9 @@ exports.bindDevice = function (req, res) {
             } else {
                 //active = 1
                 let state = fBandUser.get('active');
-                if (state == 1)
-                {
-                    ParseLogger.log("warn", "device exists", { "req": req });
-                    res.error(errors["invalidParameter"], i18n.__("Device exists"));
-                    return reject('Device exists');;
-                } else {//active = 0
-                    fBandUser.set('active', 1);
-                    return fBandUser.save(null, { useMasterKey: true })
-                }  
+                fBandUser.set('active', 1);
+                return fBandUser.save(null, { useMasterKey: true });
+                
             }
         }, function (err) {
             // res.error(errors["internalError"], i18n.__("internalError"));

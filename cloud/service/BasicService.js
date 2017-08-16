@@ -56,11 +56,25 @@ exports.instantiateApp = function (req, res) {
     //
     commonFunc.setI18n(req, i18n);
     
+    // appversion:    string 必须
+    // devicetype: enum [android ios]  必须
+    // appIdentifier: string 包名 bundleid 必须
+    // appname：  string 必须
+    // osversion: string 必须
+    // devicename: string 必须
+    // pushtype: string
+    // devicetoken: string  
+
     const devicetype = req.params.devicetype;
+    const appversion = req.params.appversion;
+    const appIdentifier = req.params.appIdentifier;
+    const appname = req.params.appname;
+    const osversion = req.params.osversion;
+    const devicename = req.params.devicename;
     const devicetoken = req.params.devicetoken;
 
-    if (!devicetype || !devicetoken ) {
-        ParseLogger.log("warn", "Not provide devicetoken or devicetype", { "req": req });
+    if (!appversion || !appIdentifier || !appname || !osversion || !devicename || !devicetype ) {
+        ParseLogger.log("warn", "Not provide enough parameters.Please check", { "req": req });
         return res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
     }
 
@@ -79,12 +93,12 @@ exports.instantiateApp = function (req, res) {
         },
         body:{
             "deviceType": req.params.devicetype,
-            "deviceToken": req.params.devicetoken,
+            "devicetoken": req.params.devicetoken,
             "appversion": req.params.appversion,
-            "appIdentifier": req.params.appIdentifier,
+            "appidentifier": req.params.appidentifier,
             "appname": req.params.appname,
             "osversion": req.params.osversion,
-            "device": req.params.device,
+            "devicename": req.params.devicename,
             "pushtype": req.params.devicetoken,
             "installationId": uuid
         }
@@ -98,7 +112,7 @@ exports.instantiateApp = function (req, res) {
             ret.installationId = uuid;
             return res.success(ret);        
         }else{
-            ParseLogger.log("error", err, { "req": req });
+            ParseLogger.log("error", error, { "req": req });
             return res.error(errors["internalError"], i18n.__("internalError"));
         }
     })
@@ -106,7 +120,68 @@ exports.instantiateApp = function (req, res) {
 
 
 exports.updateInstance = function (req, res) { 
-    
+    //
+    commonFunc.setI18n(req, i18n);
+
+    const devicename = req.params.devicename;
+    if (!devicename) {
+        ParseLogger.log("warn", "Not provide devicename", { "req": req });
+        return res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
+    }
+
+    const appversion = req.params.appversion;
+    const appname = req.params.appname;
+    const osversion = req.params.osversion;
+    const pushtype = req.params.pushtype;
+    const devicetoken = req.params.devicetoken;
+
+    Parse.User.enableUnsafeCurrentUser();
+    var query = new Parse.Query(Parse.Installation);
+    query.equalTo('devicename', devicename);
+    query.descending('createdAt');
+    query.first({
+        useMasterKey: true
+    }).then(function (singleInstallation) {
+        if(singleInstallation)
+        {
+            if(appversion){
+                singleInstallation.set("appversion",appversion);
+            }
+            if (appname) {
+                singleInstallation.set("appname", appname);
+            }
+            if (osversion) {
+                singleInstallation.set("osversion", osversion);
+            }
+            if (pushtype) {
+                singleInstallation.set("pushtype", pushtype);
+            }
+            if (devicetoken) {
+                singleInstallation.set("devicetoken", devicetoken);
+            }
+
+            singleInstallation.save().then(function(saved){
+                if(saved)
+                {
+                    var ret = {};
+                    ret.devicename = devicename;
+                    return res.success(ret);  
+                }else{
+                    ParseLogger.log("error", err, { "req": req });
+                    return res.error(errors["internalError"], i18n.__("internalError"));
+                }
+            },
+            function(err){
+                ParseLogger.log("error", err, { "req": req });
+                return res.error(errors["internalError"], i18n.__("internalError"));
+            })
+
+        }else{
+            ParseLogger.log("warn", "No device found", { "req": req });
+            return res.error(errors["noDeviceFound"], i18n.__("noDeviceFound"));        
+        }
+    });
+  
 
 };
 
