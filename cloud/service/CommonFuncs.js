@@ -162,8 +162,7 @@ let CommonFuncs = {
                         reject("remoteSvcError");
                         return;
                     }
-                    Parse.Cloud.useMasterKey();
-                    parse.Config.get()
+                    Parse.Config.get()
                         .then(function (config) {
                             if (config.get("SmsExpiration")) {
                                 smsExpiration = config.get("SmsExpiration");
@@ -204,7 +203,6 @@ let CommonFuncs = {
     },
     hiddenPhoneNo: function (phoneNo) {
         let promise = new Parse.Promise(function (resolve, reject) {
-            Parse.Cloud.useMasterKey();
             let hiddenNo = 6;
             let startLength = 3;
             let configInfoQuery = new Parse.Query(ConfigInfos);
