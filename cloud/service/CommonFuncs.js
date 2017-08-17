@@ -104,8 +104,7 @@ let CommonFuncs = {
         let minDist = 60;
         let maxCnt = 20;
         let promise = new Parse.Promise(function (resolve, reject) {
-            Parse.Cloud.useMasterKey();
-            parse.Config.get()
+            Parse.Config.get()
                 .then(function (config) {
                     let sms_parameter = config.get("sms_parameter");
                     if (sms_parameter) {
