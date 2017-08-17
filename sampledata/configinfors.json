@@ -64,3 +64,17 @@ db.versioninfos.save({
 })
 
 //
+
+db.deviceinfos.save({
+  "_id": "ozHYgZrOwd",
+  "username": "18615707058",
+  "bandAddr": "CB024534-8461-4CEF-AA83-A8F9D5BC2A1E",
+  "installationId": "installationid",
+  "devicename": "UPWEARAECAFF",
+  "devicetype": "band",
+  "active": 1,
+  "_created_at": ISODate("2017-08-16T07:24:59.124Z"),
+  "_updated_at": ISODate("2017-08-17T06:10:09.600Z"),
+  "_p_settings": "devicesettings$exnpD1QXGx"
+})
+

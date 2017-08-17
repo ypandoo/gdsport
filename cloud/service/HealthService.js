@@ -302,12 +302,18 @@ exports.getSportDataOfDay = function (req, res) {
                 deviceInfoLocal = deviceInfo;
                 var querySportDataOfDay = new Parse.Query(SportDataOfDay);
                 querySportDataOfDay.equalTo('device', deviceInfo);
+                var message ={
+                    "startdate": new Date(startDate * 1000),
+                    "endDate": new Date(endDate * 1000)
+                };
+                ParseLogger.info("Query Sport Data of Day:%j", message, { req: req });
+
                 querySportDataOfDay.greaterThanOrEqualTo('day', new Date(startDate * 1000));
                 querySportDataOfDay.lessThanOrEqualTo('day', new Date(endDate * 1000));
                 return querySportDataOfDay.count();
             }, function (err) {
                 ParseLogger.log("error", err, { "req": req });
-                res.error(errors["internalError"], i18n.__("internalError"));
+                return res.error(errors["internalError"], i18n.__("internalError"));
             }).then(function (dataCounts) {
                 // If not, create a new user.
                 var querySportDataOfDay = new Parse.Query(SportDataOfDay);
@@ -319,7 +325,7 @@ exports.getSportDataOfDay = function (req, res) {
                 });
             }, function (err) {
                 ParseLogger.log("error", err, { "req": req });
-                res.error(errors["internalError"], i18n.__("internalError"));
+                return res.error(errors["internalError"], i18n.__("internalError"));
             }).then(function (list) {
                 if (!list) {
                     return res.success([]);
@@ -334,11 +340,11 @@ exports.getSportDataOfDay = function (req, res) {
                     });
 
                 });
-                res.success(ret);
+                return res.success(ret);
 
             }, function (err) {
                 ParseLogger.log("error", err, { "req": req });
-                res.error(errors["internalError"], i18n.__("internalError"));
+                return res.error(errors["internalError"], i18n.__("internalError"));
             });
         }
     }, function (err) {
@@ -414,7 +420,7 @@ exports.getSportDataOfHour = function (req, res) {
 };
 
 
-var insertSportData = function (index, sportData, band, req) {
+var insertSportData = function (index, sportData, device, req) {
     var querySportData = new Parse.Query(RawSportData);
     var timeOfData = sportData.get("time");
     var dayOfData = _.clone(timeOfData);
@@ -423,7 +429,7 @@ var insertSportData = function (index, sportData, band, req) {
     dayOfData.setSeconds(0);
     dayOfData.setMilliseconds(0);
     querySportData.equalTo('time', sportData.get("time"));
-    querySportData.equalTo('band', band);
+    querySportData.equalTo('device', device);
     return querySportData.first().then(function (sportDataNew) {
         if (sportDataNew) {
             return Parse.Promise.error(0);
@@ -436,7 +442,7 @@ var insertSportData = function (index, sportData, band, req) {
     }).then(function (obj) {
         var querySportDataOfDay = new Parse.Query(SportDataOfDay);
         querySportDataOfDay.equalTo('day', dayOfData);
-        querySportDataOfDay.equalTo('band', band);
+        querySportDataOfDay.equalTo('device', device);
         return querySportDataOfDay.first();
     }, function (err) {
         ParseLogger.log("error", err, {"req": req});
@@ -456,7 +462,7 @@ var insertSportData = function (index, sportData, band, req) {
         sportDataOfDay.set("heat", sportData.get("heat"));
         sportDataOfDay.set("step", sportData.get("step"));
         sportDataOfDay.set("distance", sportData.get("distance"));
-        sportDataOfDay.set("band", band);
+        sportDataOfDay.set("device", device);
         return sportDataOfDay.save(null, {
             useMasterKey: true
         });
@@ -466,7 +472,7 @@ var insertSportData = function (index, sportData, band, req) {
     }).then(function (obj) {
         var querySportDataOfHour = new Parse.Query(SportDataOfHour);
         querySportDataOfHour.equalTo('day', dayOfData);
-        querySportDataOfHour.equalTo('band', band);
+        querySportDataOfHour.equalTo('device', device);
         return querySportDataOfHour.first();
     }, function (err) {
         ParseLogger.log("error", err, {"req": req});
@@ -484,7 +490,7 @@ var insertSportData = function (index, sportData, band, req) {
         var sportDataOfHour = new SportDataOfHour();
         sportDataOfHour.set("day", dayOfData);
         sportDataOfHour.set("step" + hour, sportData.get("step"));
-        sportDataOfHour.set("band", band);
+        sportDataOfHour.set("device", device);
         return sportDataOfHour.save(null, {
             useMasterKey: true
         });
