@@ -159,7 +159,7 @@ let CommonFuncs = {
                 processorService.sendCode(phoneNo, random, function (err, resp) {
                     if (err) {
                         logger.error(err, { "InnerFunc": "sendSmsCode" });
-                        reject("remoteSvcError");
+                        Parse.reject("remoteSvcError");
                         return;
                     }
                     Parse.Config.get()
@@ -189,7 +189,7 @@ let CommonFuncs = {
                             resolve(doc);
                             return;
                         }, function (err2) {
-                            reject("remoteSvcError");
+                            Parse.reject("remoteSvcError");
                             logger.error(err2, { "InnerFunc": "sendSmsCode" });
                             return;
 

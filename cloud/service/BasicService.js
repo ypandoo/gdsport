@@ -8,6 +8,7 @@ const ParseLogger = require('../../parse-server').logger;
 const commonFunc = require("./CommonFuncs");
 var ConfigInfos = Parse.Object.extend("configinfos");
 var AppVersions = Parse.Object.extend("versioninfos");
+var Events = Parse.Object.extend("events");
 
 const cfg = require('../../config/index');
 var request = require('request');
@@ -47,10 +48,39 @@ exports.getAppVersions = function (req, res) {
 };
 
 exports.uploadEvents = function (req, res) {
+    //
+    commonFunc.setI18n(req, i18n);
+
+    const dimensions = req.params.dimensions;
+    const event = req.params.event;
+    const at = req.params.at;
+
+    if (!dimensions || !event || !at) {
+        ParseLogger.log("warn", "Not provide enough parameters.Please check", { "req": req });
+        return res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
+    }
+
+    var events = new Events();
+    events.set("at", new Date(at));
+    events.set("event", event);
+    events.set("dimensions", dimensions);
+    events.save().then(function (saved) {
+            if (saved) {
+                var ret = {};
+                return res.success(ret);
+            } else {
+                ParseLogger.log("warn", "internalError", { "req": req });
+                return res.error(errors["internalError"], i18n.__("internalError"));
+            }
+        },
+        function (error) {
+            ParseLogger.log("error", error, { "req": req });
+            return res.error(errors["internalError"], i18n.__("internalError"));
+        })
 
  };
 
- 
+
 exports.instantiateApp = function (req, res) { 
     
     //
@@ -200,7 +230,7 @@ exports.sendSMSCode = function (req, res) {
     }, function (err) {
         ParseLogger.error(err, { "req": req });
         res.error(errors[err], i18n.__(err));
-        reject(err);
+        Parse.reject(err);
         return;
     })
     .then(function (doc) {
@@ -208,7 +238,7 @@ exports.sendSMSCode = function (req, res) {
     }, function (err) {
         ParseLogger.error( err, { "req": req });
         res.error(errors["smsCodeFrequent"], i18n.__("smsCodeFrequent"));
-        reject(err);
+        Parse.reject(err);
         return;
     }).then(function (finalNo) {
         let smsLogs = new SmsLogs();
