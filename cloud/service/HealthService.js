@@ -434,18 +434,18 @@ var insertSportData = function (index, sportData, device, req) {
         if (sportDataNew) {
             return Parse.Promise.error(0);
         }
-        return sportData.save(null, {
-            useMasterKey: true
-        });
+        return sportData.save();
     }, function (err) {
-        ParseLogger.log("error", err, {"req": req});
+        ParseLogger.log("error", 'save sport data failed!', {"req": req});
+        Parse.reject('save sport data failed!');
     }).then(function (obj) {
         var querySportDataOfDay = new Parse.Query(SportDataOfDay);
         querySportDataOfDay.equalTo('day', dayOfData);
         querySportDataOfDay.equalTo('device', device);
         return querySportDataOfDay.first();
     }, function (err) {
-        ParseLogger.log("error", err, {"req": req});
+        ParseLogger.log("error", {"sportdata": sportData}, {"req": req});
+        return Parse.Promise.reject(err);
     }).then(function (sportDataOfDayNew) {
         if (sportDataOfDayNew) {
 
@@ -469,6 +469,7 @@ var insertSportData = function (index, sportData, device, req) {
 
     }, function (err) {
         ParseLogger.log("error", err, {"req": req});
+        return Parse.Promise.reject(err);
     }).then(function (obj) {
         var querySportDataOfHour = new Parse.Query(SportDataOfHour);
         querySportDataOfHour.equalTo('day', dayOfData);
@@ -476,6 +477,7 @@ var insertSportData = function (index, sportData, device, req) {
         return querySportDataOfHour.first();
     }, function (err) {
         ParseLogger.log("error", err, {"req": req});
+        return Parse.Promise.reject(err);
     }).then(function (sportDataOfHourNew) {
         var hour = timeOfData.getHours();
         if (sportDataOfHourNew) {
@@ -496,6 +498,7 @@ var insertSportData = function (index, sportData, device, req) {
         });
     }, function (err) {
         ParseLogger.log("error", err, {"req": req});
+        return Parse.Promise.reject(err);
     });
 };
 
