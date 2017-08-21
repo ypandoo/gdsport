@@ -94,3 +94,9 @@ db.getCollection('_SCHEMA').save(
   }
 )
 
+db.RawSleepData.remove({})
+db.RawSportData.remove({})
+db.SportDataOfHour.remove({})
+db.SportDataOfDay.remove({})
+
+

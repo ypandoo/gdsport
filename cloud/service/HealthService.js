@@ -19,95 +19,95 @@ var DeviceInfos = Parse.Object.extend("deviceinfos");
 const ParseLogger = require('../../parse-server').logger;
 
 //merged interface
-exports.uploadHealthData = function (req, res) {
-    commonFunc.setI18n(req, i18n);
-    var devicename = req.params.devicename;
-    var sportdata = req.params.sportdata;
-    var sleepdata = req.params.sleepdata;
-    var uptime = req.params.uploadtime;
+// exports.uploadHealthData = function (req, res) {
+//     commonFunc.setI18n(req, i18n);
+//     var devicename = req.params.devicename;
+//     var sportdata = req.params.sportdata;
+//     var sleepdata = req.params.sleepdata;
+//     var uptime = req.params.uploadtime;
 
-    // var mac = req.params.mac;
-    if (!devicename || !uptime || !sportdata) {
-        ParseLogger.log("warn", "No devicename ,times, sportdata set in the param", {"req": req});
-        res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
-        return;
-    }
-    commonFunc.isSessionLegal(req, i18n).then(function (regLog) {
-        if (!regLog) {
-            ParseLogger.log("warn", "Failed to valid from the register log ", {"req": req});
-            res.error(errors["invalidSession"], i18n.__("invalidSession"));
-            Parse.Promise.reject("");
-            return;
-        } else {
-            var deviceQuery = new Parse.Query(DeviceInfos);
-            deviceQuery.equalTo("devicename", devicename);
-            return deviceQuery.first();
-        }
-    }, function (err) {
-        ParseLogger.log("error", err, {"req": req});
-        res.error(errors[err], i18n.__(err));
-        return reject("");
-    }).then(function (deviceInfo) {
-        if(!deviceInfo)
-        {
-            ParseLogger.log("error", err, { "req": req });
-            res.error(errors[err], i18n.__('DeviceNotFound'));
-            return reject("");
-        }
+//     // var mac = req.params.mac;
+//     if (!devicename || !uptime || !sportdata) {
+//         ParseLogger.log("warn", "No devicename ,times, sportdata set in the param", {"req": req});
+//         res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
+//         return;
+//     }
+//     commonFunc.isSessionLegal(req, i18n).then(function (regLog) {
+//         if (!regLog) {
+//             ParseLogger.log("warn", "Failed to valid from the register log ", {"req": req});
+//             res.error(errors["invalidSession"], i18n.__("invalidSession"));
+//             Parse.Promise.reject("");
+//             return;
+//         } else {
+//             var deviceQuery = new Parse.Query(DeviceInfos);
+//             deviceQuery.equalTo("devicename", devicename);
+//             return deviceQuery.first();
+//         }
+//     }, function (err) {
+//         ParseLogger.log("error", err, {"req": req});
+//         res.error(errors[err], i18n.__(err));
+//         return reject("");
+//     }).then(function (deviceInfo) {
+//         if(!deviceInfo)
+//         {
+//             ParseLogger.log("error", err, { "req": req });
+//             res.error(errors[err], i18n.__('DeviceNotFound'));
+//             return reject("");
+//         }
 
-        //Sport data
-        var count = 0;
-        var index = 0;
-        var sports = new Array();
-        _.forEach(sportdata, function (data) {
-            var rawSportData = new RawSportData();
-            rawSportData.set("time", new Date(parseInt(data.time) * 1000));
-            rawSportData.set("step", parseInt(data.step));
-            rawSportData.set("heat", parseInt(data.heat));
-            rawSportData.set("distance", parseInt(data.distance));
-            rawSportData.set("device", deviceInfo);
-            sports.push(rawSportData);
-        });
-        count = sports.length;
-        return commonFunc.promiseWhile(
-                function () {
-                    return index < count;
-                },
-                function () {
-                    return insertSportData(index, sports[index], deviceInfo, req)
-                        .then(function (obj) {
-                                index++;
-                                return Parse.Promise.as(index);
-                            },
-                            function (err) {
-                                index++;
-                                return Parse.Promise.as(index);
-                                //res.error(err);
-                            });
-                }).then(function () {
-                //deal with sleep data
-                if(!sleepdata){
-                    return res.success({ devicename: devicename });
-                }else
-                {
-                    return updateSleepDataL(sleepdata, deviceInfo).then(function(savedSleepData){
-                        if(savedSleepData)
-                        {
-                            return res.success({ devicename: devicename});
-                        }else{
-                            ParseLogger.log("error", err, { "req": req });
-                            return res.error(errors["internalError"], i18n.__("internalError"));
-                        }
-                    });
-                }
+//         //Sport data
+//         var count = 0;
+//         var index = 0;
+//         var sports = new Array();
+//         _.forEach(sportdata, function (data) {
+//             var rawSportData = new RawSportData();
+//             rawSportData.set("time", new Date(parseInt(data.time) * 1000));
+//             rawSportData.set("step", parseInt(data.step));
+//             rawSportData.set("heat", parseInt(data.heat));
+//             rawSportData.set("distance", parseInt(data.distance));
+//             rawSportData.set("device", deviceInfo);
+//             sports.push(rawSportData);
+//         });
+//         count = sports.length;
+//         return commonFunc.promiseWhile(
+//                 function () {
+//                     return index < count;
+//                 },
+//                 function () {
+//                     return insertSportData(index, sports[index], deviceInfo, req)
+//                         .then(function (obj) {
+//                                 index++;
+//                                 return Parse.Promise.as(index);
+//                             },
+//                             function (err) {
+//                                 index++;
+//                                 return Parse.Promise.as(index);
+//                                 //res.error(err);
+//                             });
+//                 }).then(function () {
+//                 //deal with sleep data
+//                 if(!sleepdata){
+//                     return res.success({ devicename: devicename });
+//                 }else
+//                 {
+//                     return updateSleepDataL(sleepdata, deviceInfo).then(function(savedSleepData){
+//                         if(savedSleepData)
+//                         {
+//                             return res.success({ devicename: devicename});
+//                         }else{
+//                             ParseLogger.log("error", err, { "req": req });
+//                             return res.error(errors["internalError"], i18n.__("internalError"));
+//                         }
+//                     });
+//                 }
                 
-            });
+//             });
 
-        }, function (err) {
-            ParseLogger.log("error", err, {"req": req});
-            res.error(errors["internalError"], i18n.__("internalError"));
-        });
-};
+//         }, function (err) {
+//             ParseLogger.log("error", err, {"req": req});
+//             res.error(errors["internalError"], i18n.__("internalError"));
+//         });
+// };
 
 //Upload sport data
 exports.uploadSportData = function (req, res) {
@@ -150,7 +150,7 @@ exports.uploadSportData = function (req, res) {
         var sports = new Array();
         _.forEach(sportdata, function (data) {
             var rawSportData = new RawSportData();
-            rawSportData.set("time", new Date(parseInt(data.time) * 1000));
+            rawSportData.set("time", new Date(parseInt(data.time)));
             rawSportData.set("step", parseInt(data.step));
             rawSportData.set("heat", parseInt(data.heat));
             rawSportData.set("distance", parseInt(data.distance));
@@ -303,13 +303,13 @@ exports.getSportDataOfDay = function (req, res) {
                 var querySportDataOfDay = new Parse.Query(SportDataOfDay);
                 querySportDataOfDay.equalTo('device', deviceInfo);
                 var message ={
-                    "startdate": new Date(startDate * 1000),
-                    "endDate": new Date(endDate * 1000)
+                    "startdate": new Date(startDate),
+                    "endDate": new Date(endDate)
                 };
                 ParseLogger.info("Query Sport Data of Day:%j", message, { req: req });
 
-                querySportDataOfDay.greaterThanOrEqualTo('day', new Date(startDate * 1000));
-                querySportDataOfDay.lessThanOrEqualTo('day', new Date(endDate * 1000));
+                querySportDataOfDay.greaterThanOrEqualTo('day', new Date(startDate));
+                querySportDataOfDay.lessThanOrEqualTo('day', new Date(endDate));
                 return querySportDataOfDay.count();
             }, function (err) {
                 ParseLogger.log("error", err, { "req": req });
@@ -318,8 +318,8 @@ exports.getSportDataOfDay = function (req, res) {
                 // If not, create a new user.
                 var querySportDataOfDay = new Parse.Query(SportDataOfDay);
                 querySportDataOfDay.equalTo('device', deviceInfoLocal);
-                querySportDataOfDay.greaterThanOrEqualTo('day', new Date(startDate * 1000));
-                querySportDataOfDay.lessThanOrEqualTo('day', new Date(endDate * 1000));
+                querySportDataOfDay.greaterThanOrEqualTo('day', new Date(startDate));
+                querySportDataOfDay.lessThanOrEqualTo('day', new Date(endDate));
                 return querySportDataOfDay.limit(dataCounts).find({
                     useMasterKey: true
                 });
@@ -333,7 +333,7 @@ exports.getSportDataOfDay = function (req, res) {
                 var ret = new Array();
                 _.forEach(list, function (sportDataOfDay) {
                     ret.push({
-                        time: Math.round(sportDataOfDay.get("day").getTime() / 1000),
+                        time: Math.round(sportDataOfDay.get("day").getTime()),
                         step: sportDataOfDay.get("step") ? sportDataOfDay.get("step") : 0,
                         heat: sportDataOfDay.get("heat") ? sportDataOfDay.get("heat") : 0,
                         distance: sportDataOfDay.get("distance") ? (sportDataOfDay.get("distance") / 1000).toFixed(2) : 0,
@@ -384,7 +384,7 @@ exports.getSportDataOfHour = function (req, res) {
                 deviceInfoLocal = deviceInfo;
 
                 //reset time 
-                var day = _.clone(new Date(parseInt(date * 1000)));
+                var day = _.clone(new Date(parseInt(date)));
                 day.setMinutes(0);
                 day.setHours(0);
                 day.setSeconds(0);
@@ -542,8 +542,8 @@ exports.getSleepData = function (req, res) {
                 deviceInfoLocal = deviceInfo;
                 var querySleepData = new Parse.Query(RawSleepData);
                 querySleepData.equalTo('device', deviceInfo);
-                querySleepData.greaterThanOrEqualTo('day', new Date(startDate * 1000));
-                querySleepData.lessThanOrEqualTo('day', new Date(endDate * 1000));
+                querySleepData.greaterThanOrEqualTo('day', new Date(startDate));
+                querySleepData.lessThanOrEqualTo('day', new Date(endDate));
                 return querySleepData.limit(10000).find({
                     useMasterKey: true
                 });
@@ -557,7 +557,7 @@ exports.getSleepData = function (req, res) {
                 var ret = new Array();
                 _.forEach(list, function (rawSleepData) {
                     ret.push({
-                        time: Math.round(rawSleepData.get("day").getTime() / 1000),
+                        time: rawSleepData.get("day").getTime(),
                         gotoSleepPoint: rawSleepData.get("gotoSleepPoint"),
                         getUpPoint: rawSleepData.get("getUpPoint"),
                         lightSleepTime: rawSleepData.get("lightSleepTime"),
