@@ -382,9 +382,17 @@ exports.getSportDataOfHour = function (req, res) {
                     return res.error(errors["noDeviceFound"], i18n.__("noDeviceFound"));
                 }
                 deviceInfoLocal = deviceInfo;
+
+                //reset time 
+                var day = _.clone(new Date(parseInt(date * 1000)));
+                day.setMinutes(0);
+                day.setHours(0);
+                day.setSeconds(0);
+                day.setMilliseconds(0);
+
                 var querySportDataOfHour = new Parse.Query(SportDataOfHour);
                 querySportDataOfHour.equalTo('device', deviceInfo);
-                querySportDataOfHour.equalTo('day', new Date(date * 1000));
+                querySportDataOfHour.equalTo('day', day);
                 return querySportDataOfHour.first({
                     useMasterKey: true
                 });

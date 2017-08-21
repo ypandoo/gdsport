@@ -64,7 +64,6 @@ db.versioninfos.save({
 })
 
 //
-
 db.deviceinfos.save({
   "_id": "ozHYgZrOwd",
   "username": "18615707058",
@@ -77,4 +76,21 @@ db.deviceinfos.save({
   "_updated_at": ISODate("2017-08-17T06:10:09.600Z"),
   "_p_settings": "devicesettings$exnpD1QXGx"
 })
+
+//
+db.getCollection('_SCHEMA').save(
+  {
+    "_id": "RawSleepData",
+    "objectId": "string",
+    "updatedAt": "date",
+    "createdAt": "date",
+    "day": "date",
+    "gotoSleepPoint": "number",
+    "getUpPoint": "number",
+    "lightSleepTime": "number",
+    "deepSleepTime": "number",
+    "wakeupTime": "number",
+    "device": "*deviceinfos"
+  }
+)
 
