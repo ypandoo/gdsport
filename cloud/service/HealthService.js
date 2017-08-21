@@ -302,14 +302,14 @@ exports.getSportDataOfDay = function (req, res) {
                 deviceInfoLocal = deviceInfo;
                 var querySportDataOfDay = new Parse.Query(SportDataOfDay);
                 querySportDataOfDay.equalTo('device', deviceInfo);
-                var message ={
-                    "startdate": new Date(startDate),
-                    "endDate": new Date(endDate)
-                };
-                ParseLogger.info("Query Sport Data of Day:%j", message, { req: req });
+                // var message ={
+                //     "startdate": new Date(startDate),
+                //     "enddate": new Date(endDate)
+                // };
+                // ParseLogger.info("Query Sport Data of Day:%j", message, { req: req });
 
-                querySportDataOfDay.greaterThanOrEqualTo('day', new Date(startDate));
-                querySportDataOfDay.lessThanOrEqualTo('day', new Date(endDate));
+                querySportDataOfDay.greaterThanOrEqualTo('day', new Date(parseInt(startDate)));
+                querySportDataOfDay.lessThanOrEqualTo('day', new Date(parseInt(endDate)));
                 return querySportDataOfDay.count();
             }, function (err) {
                 ParseLogger.log("error", err, { "req": req });
@@ -318,8 +318,8 @@ exports.getSportDataOfDay = function (req, res) {
                 // If not, create a new user.
                 var querySportDataOfDay = new Parse.Query(SportDataOfDay);
                 querySportDataOfDay.equalTo('device', deviceInfoLocal);
-                querySportDataOfDay.greaterThanOrEqualTo('day', new Date(startDate));
-                querySportDataOfDay.lessThanOrEqualTo('day', new Date(endDate));
+                querySportDataOfDay.greaterThanOrEqualTo('day', new Date(parseInt(startDate)));
+                querySportDataOfDay.lessThanOrEqualTo('day', new Date(parseInt(endDate)));
                 return querySportDataOfDay.limit(dataCounts).find({
                     useMasterKey: true
                 });
@@ -542,8 +542,8 @@ exports.getSleepData = function (req, res) {
                 deviceInfoLocal = deviceInfo;
                 var querySleepData = new Parse.Query(RawSleepData);
                 querySleepData.equalTo('device', deviceInfo);
-                querySleepData.greaterThanOrEqualTo('day', new Date(startDate));
-                querySleepData.lessThanOrEqualTo('day', new Date(endDate));
+                querySleepData.greaterThanOrEqualTo('day', new Date(parseInt(startDate)));
+                querySleepData.lessThanOrEqualTo('day', new Date(parseInt(endDate)));
                 return querySleepData.limit(10000).find({
                     useMasterKey: true
                 });
