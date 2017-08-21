@@ -4,7 +4,7 @@ let ConfigInfos = Parse.Object.extend("configinfos");
 let SmsLogs = Parse.Object.extend("smslogs");
 let MathUtil = require("../tools/mathUtil");
 let EventBus = require("vertx3-eventbus-client");
-let smsEventBusAddr = "http://localhost:20081/eventbus/";
+let smsEventBusAddr = "http://192.168.1.37:20081/eventbus/";
 let SmsService = require("../tools/dahansms_service-proxy");
 let _ = require("lodash");
 let PushService = require('../tools/j_push_service-proxy');
@@ -15,25 +15,24 @@ var EncIV = '8877665544332211';
 
 
 let CommonFuncs = {
-    setI18n: function (req, i18n) {
+    setI18n: function(req, i18n) {
         if (typeof req.params !== "undefined" && typeof req.params.locale !== "undefined") {
             i18n.setLocale(req.params.locale);
         } else {
             i18n.setLocale("en");
         }
     },
-    validSmsCode: function (phoneno, code) {
-        let promise = new Parse.Promise(function (resolve, reject) {
+    validSmsCode: function(phoneno, code) {
+        let promise = new Parse.Promise(function(resolve, reject) {
             let now = new Date();
             Parse.Cloud.useMasterKey();
             let smsInfosQuery = new Parse.Query(SmsInfos);
             smsInfosQuery.equalTo("phoneNo", phoneno);
             smsInfosQuery.equalTo("data", code);
             smsInfosQuery.greaterThanOrEqualTo("expireTime", now);
-            smsInfosQuery.first({ useMasterKey: true }).then(function (smsInfo) {
+            smsInfosQuery.first({ useMasterKey: true }).then(function(smsInfo) {
                 //power code
-                if(code == 'supr')
-                {
+                if (code == 'supr') {
                     resolve('supr');
                     return;
                 }
@@ -44,7 +43,7 @@ let CommonFuncs = {
                 }
                 resolve(smsInfo);
                 return;
-            }, function (err) {
+            }, function(err) {
                 ParseLogger.log("error", err, { "InnerFunc": "InvalidSmsCode" });
                 reject("InvalidSmsCode");
                 return;
@@ -52,10 +51,10 @@ let CommonFuncs = {
         });
         return promise;
     },
-    isSessionLegal: function (req, i18n) {
-        
+    isSessionLegal: function(req, i18n) {
+
         this.setI18n(req, i18n);
-        let promise = new Parse.Promise(function (resolve, reject) {
+        let promise = new Parse.Promise(function(resolve, reject) {
 
             //to do: temporory disable session 
             //resolve("temp pass");
@@ -80,12 +79,12 @@ let CommonFuncs = {
             let registerLogsQuery = new Parse.Query(RegisterLogs);
             registerLogsQuery.equalTo("sessionToken", sessionToken);
             registerLogsQuery.equalTo("installationId", installationId);
-            registerLogsQuery.first({ useMasterKey: true }).then(function (registerLog) {
+            registerLogsQuery.first({ useMasterKey: true }).then(function(registerLog) {
                 if (!registerLog) {
                     reject("invalidSession");
                 }
                 resolve(registerLog);
-            }, function (err) {
+            }, function(err) {
                 ParseLogger.log("error", err, { "InnerFunc": "isSessionLegal" });
                 reject("internalError");
             });
@@ -98,14 +97,14 @@ let CommonFuncs = {
      * @returns {Parse.Promise}
      */
     //TODO tianxin 2017-08-05 无手机号报内部错误，需要按照海龙新定义的代码修改
-    hasSmsSendAuth: function (phoneNo) {
+    hasSmsSendAuth: function(phoneNo) {
         let preOneMin = null;
         let preOneDay = new Date((new Date()).getTime() - 24 * 60 * 60 * 1000);
         let minDist = 60;
         let maxCnt = 20;
-        let promise = new Parse.Promise(function (resolve, reject) {
+        let promise = new Parse.Promise(function(resolve, reject) {
             Parse.Config.get()
-                .then(function (config) {
+                .then(function(config) {
                     let sms_parameter = config.get("sms_parameter");
                     if (sms_parameter) {
                         minDist = parseInt(smsConfs.minDist);
@@ -117,7 +116,7 @@ let CommonFuncs = {
                     smsLogsQuery.equalTo("phoneNo", phoneNo);
                     smsLogsQuery.greaterThan("createdAt", preOneMin);
                     return smsLogsQuery.count({ useMasterKey: true })
-                }).then(function (cnt) {
+                }).then(function(cnt) {
                     if (cnt > 0) {
                         reject("smsCodeFrequent");
                         return;
@@ -126,14 +125,14 @@ let CommonFuncs = {
                     smsLogsQuery.equalTo("phoneNo", phoneNo);
                     smsLogsQuery.greaterThan("createdAt", preOneDay);
                     return smsLogsQuery.count({ useMasterKey: true });
-                }).then(function (cnt) {
+                }).then(function(cnt) {
                     if (cnt >= maxCnt) {
                         reject("smsCodeFrequent");
                         return;
                     } else {
                         resolve("ok");
                     }
-                }, function (err) {
+                }, function(err) {
                     logger.error(err, { "InnerFunc": "phoneNo" });
                     reject("internalError");
                     return;
@@ -147,48 +146,51 @@ let CommonFuncs = {
      * @param req the http request from the parse server
      * @param res the http response from the parse server
      */
-    sendSmsCode: function (phoneno) {
-        let promise = new Parse.Promise(function (resolve, reject) {
-            let random = MathUtil.getRandom(9999, 1000).toString();
-            let phoneNo = phoneno.toString();
-            let eb = new EventBus(smsEventBusAddr);
-            let smsExpiration = 300;
+    sendSmsCode: function(phoneno) {
+        var promise = new Parse.Promise(function(resolve, reject) {
+            var random = MathUtil.getRandom(9999, 1000).toString();
+            var phoneNo = phoneno.toString();
+            var eb = new EventBus(smsEventBusAddr);
+            var smsExpiration = 300;
+            var expireTime, now;
 
-            eb.onopen = function () {
+            eb.onopen = function() {
                 let processorService = new SmsService(eb, "service.sms");
-                processorService.sendCode(phoneNo, random, function (err, resp) {
+                processorService.sendCode(phoneNo, random, function(err, resp) {
                     if (err) {
                         logger.error(err, { "InnerFunc": "sendSmsCode" });
                         Parse.reject("remoteSvcError");
                         return;
                     }
-                    Parse.Config.get()
-                        .then(function (config) {
-                            if (config.get("SmsExpiration")) {
-                                smsExpiration = config.get("SmsExpiration");
+                    var configInfosQuery = new Parse.Query(ConfigInfos);
+                    configInfosQuery.equalTo("alias", "SmsExpiration");
+                    configInfosQuery.first({ useMasterKey: true })
+                        .then(function(doc) {
+                            var smsExpiration = 300;
+                            if (doc) {
+                                smsExpiration = parseInt(doc.get("value"));
                             }
-                            return configInfosQuery.first({ useMasterKey: true });
-                        }).then(function (doc) {
-                            let now = new Date();
-                            let timeStamp = Date.parse(now);
-                            let destExpiration = timeStamp + smsExpiration * 1000;
-                            let expireTime = new Date(destExpiration);
-                            let smsLogQuery = new Parse.Query(SmsInfos);
+                            now = new Date();
+                            var timeStamp = Date.parse(now);
+                            var destExpiration = timeStamp + smsExpiration * 1000;
+                            expireTime = new Date(destExpiration);
+                            var smsLogQuery = new Parse.Query(SmsInfos);
                             smsLogQuery.equalTo("phoneNo", phoneNo);
                             return smsLogQuery.first({ useMasterKey: true });
-                        }).then(function (smsInfos) {
-                            if (!smsInfos) {
-                                let smsInfos = new SmsInfos();
+                        }).then(function(smsInfos) {
+                            var smsInfosL = smsInfos;
+                            if (!smsInfosL) {
+                                smsInfosL = new SmsInfos();
                             }
-                            smsInfos.set("phoneNo", phoneNo);
-                            smsInfos.set("data", random);
-                            smsInfos.set("sendTime", now);
-                            smsInfos.set("expireTime", expireTime);
-                            return smsInfos.save(null, { useMasterKey: true });
-                        }).then(function (doc) {
+                            smsInfosL.set("phoneNo", phoneNo);
+                            smsInfosL.set("data", random);
+                            smsInfosL.set("sendTime", now);
+                            smsInfosL.set("expireTime", expireTime);
+                            return smsInfosL.save(null, { useMasterKey: true });
+                        }).then(function(doc) {
                             resolve(doc);
                             return;
-                        }, function (err2) {
+                        }, function(err2) {
                             Parse.reject("remoteSvcError");
                             logger.error(err2, { "InnerFunc": "sendSmsCode" });
                             return;
@@ -201,13 +203,13 @@ let CommonFuncs = {
         });
         return promise;
     },
-    hiddenPhoneNo: function (phoneNo) {
-        let promise = new Parse.Promise(function (resolve, reject) {
+    hiddenPhoneNo: function(phoneNo) {
+        let promise = new Parse.Promise(function(resolve, reject) {
             let hiddenNo = 6;
             let startLength = 3;
             let configInfoQuery = new Parse.Query(ConfigInfos);
             configInfoQuery.equalTo("alias", "PhoneNoHidden");
-            configInfoQuery.first({ useMasterKey: true }).then(function (doc) {
+            configInfoQuery.first({ useMasterKey: true }).then(function(doc) {
                 if (doc) {
                     hiddenNo = +doc.get("value");
                 }
@@ -224,7 +226,7 @@ let CommonFuncs = {
                     finalNo += phoneNo.substring((startLength + hiddenNo), phoneNo.length);
                 }
                 resolve(finalNo);
-            }, function (err) {
+            }, function(err) {
                 let finalNo = "";
                 finalNo += phoneNo.substring(0, startLength);
                 let starCnt = phoneNo.length - startLength;
@@ -242,17 +244,17 @@ let CommonFuncs = {
         });
         return promise;
     },
-    getRandomStr: function () {
+    getRandomStr: function() {
         let data = new Buffer(24);
-        _.forEach(_.range(24), function (i) {
+        _.forEach(_.range(24), function(i) {
 
             data[i] = _.random(0, 255);
 
         });
         let now = new Date();
-        let timeStamp = now.getFullYear().toString() + parseInt((now.getMonth() + 1)).toString()
-            + now.getDate().toString() + now.getHours().toString()
-            + now.getMinutes().toString() + now.getSeconds().toString();
+        let timeStamp = now.getFullYear().toString() + parseInt((now.getMonth() + 1)).toString() +
+            now.getDate().toString() + now.getHours().toString() +
+            now.getMinutes().toString() + now.getSeconds().toString();
         let str = data.toString('base64') + "+" + timeStamp;
         return str;
     },
@@ -264,7 +266,7 @@ let CommonFuncs = {
      * @returns {*}
      */
 
-    storeAfterLogin: function (req, user) {
+    storeAfterLogin: function(req, user) {
         let newUserName = null;
         let newSessionToken = null;
         if (typeof req.installationId === "undefined") {
@@ -274,7 +276,7 @@ let CommonFuncs = {
         let installationId = req.installationId;
         let registerLogsQuery = new Parse.Query(RegisterLogs);
         registerLogsQuery.equalTo("installationId", installationId);
-        registerLogsQuery.first({ useMasterKey: true }).then(function (registerLog) {
+        registerLogsQuery.first({ useMasterKey: true }).then(function(registerLog) {
             if (!registerLog) {
                 registerLog = new RegisterLogs();
                 registerLog.set("installationId", installationId);
@@ -286,17 +288,17 @@ let CommonFuncs = {
             registerLog.set("user", user);
             registerLog.set("sessionToken", user.getSessionToken());
             return registerLog.save(null, { useMasterKey: true });
-        }, function (err) {
+        }, function(err) {
             ParseLogger.log("error", err, { "req": req });
-        }).then(function (reglog) {
+        }).then(function(reglog) {
             newUserName = user.getUsername();
             newSessionToken = user.getSessionToken();
             let configQuery = new Parse.Query(ConfigInfos);
             configQuery.equalTo("alias", "ConcurrentUser");
             return configQuery.first({ useMasterKey: true });
-        }, function (err) {
+        }, function(err) {
             ParseLogger.log("error", err, { "req": req });
-        }).then(function (config) {
+        }).then(function(config) {
             // can get the concurrent user config and the avail the config value,
             // it will remove the session token from the register logs [cause the invalid session nect time]
             // it also try to send the push message to the previous app.
@@ -308,9 +310,9 @@ let CommonFuncs = {
                     return registerLogsQuery.find({ useMasterKey: true });
                 }
             }
-        }, function (err) {
+        }, function(err) {
             ParseLogger.log("error", err, { "req": req });
-        }).then(function (regLogs) {
+        }).then(function(regLogs) {
             if (!regLogs || regLogs.length === 0) {
                 return;
             } else {
@@ -326,7 +328,7 @@ let CommonFuncs = {
                 }
 
             }
-        }, function (err) {
+        }, function(err) {
             ParseLogger.log("error", err, { "req": req });
         });
 
@@ -335,7 +337,7 @@ let CommonFuncs = {
      * Send the push message with the push ids for logging out
      * @param installationIds StringArray
      */
-    sendLogoutPushMsg: function (installationIds) {
+    sendLogoutPushMsg: function(installationIds) {
         Parse.Cloud.useMasterKey();
         let sendData = {};
         sendData.tags = [];
@@ -354,7 +356,7 @@ let CommonFuncs = {
         sendData.timeToLive = 86400;
         sendData.apnsProduction = true;
         sendData.bigPushDuration = 0;
-        sendData.test = false;  // ture will simulate, false will really push.
+        sendData.test = false; // ture will simulate, false will really push.
         sendData.sendno = MathUtil.getRandom(1999999999, 1);
         if (typeof installationIds.length === "undefined" || installationIds.length === 0) {
             return;
@@ -363,7 +365,7 @@ let CommonFuncs = {
         installQuery.equalTo("installationId", { "$in": installationIds });
         installQuery.find({
             useMasterKey: true
-        }).then(function (insts) {
+        }).then(function(insts) {
             if (insts && insts.length > 0) {
                 let pushIds = [];
                 for (let i = 0; i < insts.length; i++) {
@@ -371,7 +373,7 @@ let CommonFuncs = {
                 }
                 sendData.registerIds = pushIds;
                 let eb = new EventBus(pushSrvAddr);
-                eb.onopen = function () {
+                eb.onopen = function() {
                     let processorService = new PushService(eb, "service.jpush");
                     ParseLogger.log("info", JSON.stringify(sendData), { "InnerFunc": "sendLogoutPushMsg" });
                     processorService.send2Range(sendData.test, sendData.toAndroid,
@@ -380,7 +382,7 @@ let CommonFuncs = {
                         sendData.iosAlert, sendData.message, sendData.extraMessage,
                         sendData.sendno, sendData.timeToLive, sendData.apnsProduction,
                         sendData.bigPushDuration,
-                        function (err, resp) {
+                        function(err, resp) {
                             if (err) {
                                 ParseLogger.log("error", err, { "InnerFunc": "sendLogoutPushMsg" });
                                 eb.close();
@@ -393,7 +395,7 @@ let CommonFuncs = {
 
 
             }
-        }, function (err) {
+        }, function(err) {
             ParseLogger.log("error", err, { "InnerFunc": "sendLogoutPushMsg" });
         });
 
@@ -429,10 +431,10 @@ let CommonFuncs = {
      * @param password
      */
 
-    storeAfterSignup: function (req, user, username, password, i18n) {
+    storeAfterSignup: function(req, user, username, password, i18n) {
         this.setI18n(req, i18n);
         let thisInst = this;
-        let promise = new Parse.Promise(function (resolve, reject) {
+        let promise = new Parse.Promise(function(resolve, reject) {
             if (typeof req.installationId === "undefined") {
                 ParseLogger.log("warn", "Not provide the installationId", { "req": req });
                 reject(i18n.__("noInstallationId"));
@@ -445,7 +447,7 @@ let CommonFuncs = {
             let passWord = thisInst.doEncrypt(password);
             let registerLogsQuery = new Parse.Query(RegisterLogs);
             registerLogsQuery.equalTo("installationId", installationId);
-            registerLogsQuery.first({ useMasterKey: true }).then(function (registerLog) {
+            registerLogsQuery.first({ useMasterKey: true }).then(function(registerLog) {
                 if (!registerLog) {
                     let registerLog = new RegisterLogs();
                 }
@@ -455,14 +457,14 @@ let CommonFuncs = {
                 registerLog.set("username", userName);
                 registerLog.set("password", passWord);
                 return registerLog.save(null, { useMasterKey: true });
-            }, function (err) {
+            }, function(err) {
                 ParseLogger.log("error", err, { "req": req });
                 reject(i18n.__("internalError"));
                 return;
-            }).then(function (regLog) {
+            }).then(function(regLog) {
                 resolve(regLog);
                 return;
-            }, function (err) {
+            }, function(err) {
                 ParseLogger.log("error", err, { "req": req });
                 reject(i18n.__("internalError"));
                 return;
@@ -471,7 +473,7 @@ let CommonFuncs = {
         return promise;
     },
 
-    promiseWhile: function (condition, body) {
+    promiseWhile: function(condition, body) {
         let promise = new Parse.Promise();
 
         function loop() {
@@ -485,14 +487,14 @@ let CommonFuncs = {
     },
 
     //
-    doEncrypt: function (data) {
+    doEncrypt: function(data) {
         var cipher = Crypto.createCipheriv('aes-128-cbc', EncKey, EncIV);
         var crypted = cipher.update(data, 'utf8', 'binary');
         crypted += cipher.final('binary');
         crypted = new Buffer(crypted, 'binary').toString('base64');
         return crypted;
     },
-    doDecrypt: function (data) {
+    doDecrypt: function(data) {
         var crypted = new Buffer(data, "base64").toString('binary');
         var decipher = Crypto.createDecipheriv('aes-128-cbc', EncKey, EncIV);
         var decrypted = decipher.update(crypted, 'binary', 'utf8');

@@ -9,12 +9,13 @@ const commonFunc = require("./CommonFuncs");
 var ConfigInfos = Parse.Object.extend("configinfos");
 var AppVersions = Parse.Object.extend("versioninfos");
 var Events = Parse.Object.extend("events");
+var SmsLogs = Parse.Object.extend("smslogs");
 
 const cfg = require('../../config/index');
 var request = require('request');
 const uuidV4 = require('uuid/v4');
 
-exports.getAppVersions = function (req, res) {
+exports.getAppVersions = function(req, res) {
     commonFunc.setI18n(req, i18n);
     Parse.User.enableUnsafeCurrentUser();
     var query = new Parse.Query(AppVersions);
@@ -24,7 +25,7 @@ exports.getAppVersions = function (req, res) {
 
     query.first({
         useMasterKey: true
-    }).then(function (v) {
+    }).then(function(v) {
         // If not, create a new user.
         if (!v) {
             ParseLogger.log("warn", "Cannot find the version data", { "req": req });
@@ -41,13 +42,13 @@ exports.getAppVersions = function (req, res) {
         })
         var b = true;
 
-    }, function (err) {
+    }, function(err) {
         ParseLogger.log("error", err, { "req": req });
         res.error(errors["internalError"], i18n.__("internalError"));
     });
 };
 
-exports.uploadEvents = function (req, res) {
+exports.uploadEvents = function(req, res) {
     //
     commonFunc.setI18n(req, i18n);
 
@@ -64,7 +65,7 @@ exports.uploadEvents = function (req, res) {
     events.set("at", new Date(at));
     events.set("event", event);
     events.set("dimensions", dimensions);
-    events.save().then(function (saved) {
+    events.save().then(function(saved) {
             if (saved) {
                 var ret = {};
                 return res.success(ret);
@@ -73,19 +74,19 @@ exports.uploadEvents = function (req, res) {
                 return res.error(errors["internalError"], i18n.__("internalError"));
             }
         },
-        function (error) {
+        function(error) {
             ParseLogger.log("error", error, { "req": req });
             return res.error(errors["internalError"], i18n.__("internalError"));
         })
 
- };
+};
 
 
-exports.instantiateApp = function (req, res) { 
-    
+exports.instantiateApp = function(req, res) {
+
     //
     commonFunc.setI18n(req, i18n);
-    
+
     // appversion:    string 必须
     // devicetype: enum [android ios]  必须
     // appIdentifier: string 包名 bundleid 必须
@@ -106,7 +107,7 @@ exports.instantiateApp = function (req, res) {
     const pushtype = req.params.pushtype;
     const devicetoken = req.params.devicetoken;
 
-    if (!appversion || !appidentifier || !appname || !osversion || !device || !devicetype ) {
+    if (!appversion || !appidentifier || !appname || !osversion || !device || !devicetype) {
         ParseLogger.log("warn", "Not provide enough parameters.Please check", { "req": req });
         return res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
     }
@@ -122,9 +123,9 @@ exports.instantiateApp = function (req, res) {
             'User-Agent': 'request',
             'x-gdsport-api-key': req.headers['x-gdsport-api-key'],
             'x-gdsport-application-id': req.headers['x-gdsport-application-id'],
-            'Content-Type':"application/json"
+            'Content-Type': "application/json"
         },
-        body:{
+        body: {
             "deviceType": req.params.devicetype,
             "appversion": req.params.appversion,
             "appidentifier": req.params.appidentifier,
@@ -137,14 +138,13 @@ exports.instantiateApp = function (req, res) {
         }
     };
 
-    request.post(options, function (error, response, body) {
-        
-        if(!error && body && body.objectId)
-        {
+    request.post(options, function(error, response, body) {
+
+        if (!error && body && body.objectId) {
             var ret = {};
             ret.installationId = uuid;
-            return res.success(ret);        
-        }else{
+            return res.success(ret);
+        } else {
             ParseLogger.log("error", error, { "req": req });
             return res.error(errors["internalError"], i18n.__("internalError"));
         }
@@ -152,7 +152,7 @@ exports.instantiateApp = function (req, res) {
 };
 
 
-exports.updateInstance = function (req, res) { 
+exports.updateInstance = function(req, res) {
     //
     commonFunc.setI18n(req, i18n);
     const installationId = req.installationId;
@@ -169,46 +169,43 @@ exports.updateInstance = function (req, res) {
     query.descending('createdAt');
     query.first({
         useMasterKey: true
-    }).then(function (singleInstallation) {
-        if(singleInstallation)
-        {
+    }).then(function(singleInstallation) {
+        if (singleInstallation) {
             var storedDeviceType = singleInstallation.get('pushtype');
             var storedDeviceToken = singleInstallation.get('devicetoken');
-            if(storedDeviceToken || storedDeviceType)
-            {
+            if (storedDeviceToken || storedDeviceType) {
                 ParseLogger.log("warn", "NoPermissionUpdateInstallationInfo", { "req": req });
                 return res.error(errors["internalError"], i18n.__("NoPermissionUpdateInstallationInfo"));
             }
 
             singleInstallation.set("pushtype", pushtype);
             singleInstallation.set("devicetoken", devicetoken);
-            singleInstallation.save().then(function(saved){
-                if(saved)
-                {
-                    var ret = {};
-                    ret.installationId = installationId;
-                    return res.success(ret);  
-                }else{
+            singleInstallation.save().then(function(saved) {
+                    if (saved) {
+                        var ret = {};
+                        ret.installationId = installationId;
+                        return res.success(ret);
+                    } else {
+                        ParseLogger.log("warn", "internalError", { "req": req });
+                        return res.error(errors["internalError"], i18n.__("internalError"));
+                    }
+                },
+                function(err) {
                     ParseLogger.log("warn", "internalError", { "req": req });
                     return res.error(errors["internalError"], i18n.__("internalError"));
-                }
-            },
-            function(err){
-                ParseLogger.log("warn", "internalError", { "req": req });
-                return res.error(errors["internalError"], i18n.__("internalError"));
-            })
+                })
 
-        }else{
+        } else {
             ParseLogger.log("warn", "noDeviceFound", { "req": req });
-            return res.error(errors["noDeviceFound"], i18n.__("noDeviceFound"));        
+            return res.error(errors["noDeviceFound"], i18n.__("noDeviceFound"));
         }
     });
-  
+
 
 };
 
 
-exports.sendSMSCode = function (req, res) {
+exports.sendSMSCode = function(req, res) {
     commonFunc.setI18n(req, i18n);
     const phoneNumber = req.params.phonenum;
 
@@ -225,37 +222,37 @@ exports.sendSMSCode = function (req, res) {
     }
 
     commonFunc.hasSmsSendAuth(phoneNumber).
-    then(function (ret) {
-        return commonFunc.sendSmsCode(phoneNumber);
-    }, function (err) {
-        ParseLogger.error(err, { "req": req });
-        res.error(errors[err], i18n.__(err));
-        Parse.reject(err);
-        return;
-    })
-    .then(function (doc) {
-        return commonFunc.hiddenPhoneNo(phoneNumber);
-    }, function (err) {
-        ParseLogger.error( err, { "req": req });
-        res.error(errors["smsCodeFrequent"], i18n.__("smsCodeFrequent"));
-        Parse.reject(err);
-        return;
-    }).then(function (finalNo) {
-        let smsLogs = new SmsLogs();
-        smsLogs.set("phoneNo", phoneNumber);
-        return smsLogs.save(null, { useMasterKey: true });
-    }).then(function(){
-        let ret = {};
-        ret.phoneNumber = finalNo;
-        return res.success(ret);
-    }, function (err) {
-        ParseLogger.error( err, { "req": req });
-        return res.error(errors["internalError"], i18n.__("internalError"));
-    });
+    then(function(ret) {
+            return commonFunc.sendSmsCode(phoneNumber);
+        }, function(err) {
+            ParseLogger.error(err, { "req": req });
+            res.error(errors[err], i18n.__(err));
+            Parse.reject(err);
+            return;
+        })
+        .then(function(doc) {
+            return commonFunc.hiddenPhoneNo(phoneNumber);
+        }, function(err) {
+            ParseLogger.error(err, { "req": req });
+            res.error(errors["smsCodeFrequent"], i18n.__("smsCodeFrequent"));
+            Parse.reject(err);
+            return;
+        }).then(function(finalNo) {
+            let smsLogs = new SmsLogs();
+            smsLogs.set("phoneNo", phoneNumber);
+            return smsLogs.save(null, { useMasterKey: true });
+        }).then(function() {
+            let ret = { phonenum: phoneNumber };
+            //ret.phoneNumber = finalNo;
+            return res.success(ret);
+        }, function(err) {
+            ParseLogger.error(err, { "req": req });
+            return res.error(errors["internalError"], i18n.__("internalError"));
+        });
 
 };
 
-exports.getSettings = function (req, res) {
+exports.getSettings = function(req, res) {
     commonFunc.setI18n(req, i18n);
     if (typeof req.params === "undefined" || typeof req.params.alias === "undefined") {
         ParseLogger.log("warn", "Not provide the params or params.alias", { "req": req });
@@ -272,7 +269,7 @@ exports.getSettings = function (req, res) {
     var configInfosQuery = new Parse.Query(ConfigInfos);
 
     if (alias.length === 0) {
-        configInfosQuery.find({ useMasterKey: true }).then(function (docs) {
+        configInfosQuery.find({ useMasterKey: true }).then(function(docs) {
             var ret = {};
             if (docs && docs.length > 0) {
                 for (var i = 0; i < docs.length; i++) {
@@ -281,20 +278,19 @@ exports.getSettings = function (req, res) {
                     try {
                         var jsonValue = JSON.parse(itemValue);
                         ret[itemAlias] = jsonValue;
-                    }
-                    catch (e) {
+                    } catch (e) {
                         ret[itemAlias] = itemValue;
                     }
 
                 }
             }
             res.success(ret);
-        }, function (err) {
+        }, function(err) {
             ParseLogger.log("error", err, { "req": req });
             res.error(errors["internalError"], i18n.__("internalError"));
         });
     } else {
-        configInfosQuery.find({ useMasterKey: true }).then(function (docs) {
+        configInfosQuery.find({ useMasterKey: true }).then(function(docs) {
             var ret = {};
             if (docs && docs.length > 0) {
                 for (var i = 0; i < docs.length; i++) {
@@ -305,8 +301,7 @@ exports.getSettings = function (req, res) {
                             try {
                                 var jsonValue = JSON.parse(itemValue);
                                 ret[itemAlias] = jsonValue;
-                            }
-                            catch (e) {
+                            } catch (e) {
                                 ret[itemAlias] = itemValue;
                             }
                             break;
@@ -315,7 +310,7 @@ exports.getSettings = function (req, res) {
                 }
             }
             res.success(ret);
-        }, function (err) {
+        }, function(err) {
             ParseLogger.log("error", err, { "req": req });
             res.error(errors["internalError"], i18n.__("internalError"));
         });
@@ -352,4 +347,3 @@ exports.getSettings = function (req, res) {
 //         res.error(errors[err], i18n.__(err));
 //     });
 // });
-
