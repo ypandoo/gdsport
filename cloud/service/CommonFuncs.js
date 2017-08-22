@@ -440,11 +440,13 @@ let CommonFuncs = {
             let userName = username;
             let passWord = thisInst.doEncrypt(password);
             let registerLogsQuery = new Parse.Query(RegisterLogs);
+ 
             registerLogsQuery.equalTo("installationId", installationId);
             registerLogsQuery.first({ useMasterKey: true }).then(function(registerLog) {
                 if (!registerLog) {
-                    let registerLog = new RegisterLogs();
+                    registerLog = new RegisterLogs();
                 }
+
                 registerLog.set("installationId", installationId);
                 registerLog.set("sessionToken", sessionToken);
                 registerLog.set("user", user);

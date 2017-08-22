@@ -31,5 +31,6 @@
 	"noLocalTime": "The app local time is missed",
 	"Device exists": "Device exists",
 	"noDeviceFound": "noDeviceFound",
-	"NoPermissionUpdateInstallationInfo": "NoPermissionUpdateInstallationInfo"
+	"NoPermissionUpdateInstallationInfo": "NoPermissionUpdateInstallationInfo",
+	"noUser": "noUser"
 }

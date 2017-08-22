@@ -83,7 +83,7 @@ exports.signup = function (req, res)  {
             reject(errors["invalidSmsCode"], i18n.__("invalidSmsCode"));
             return;
         } else {
-            let userQuery = new Parse.Query(User);
+            let userQuery = new Parse.Query(Parse.User);
             userQuery.equalTo('username', phoneNumber.toString());
             return userQuery.first({useMasterKey: true});
         }
@@ -109,7 +109,7 @@ exports.signup = function (req, res)  {
 
 exports.resetPassword = function (req, res) {
     commonFunc.setI18n(req, i18n);
-    let phoneNumber = req.params.phonenum;
+    var phoneNumber = req.params.phonenum;
     phoneNumber = phoneNumber.replace(/\D/g, '');
 
     if (typeof req.installationId === "undefined" || !req.installationId) {
@@ -117,8 +117,8 @@ exports.resetPassword = function (req, res) {
         res.error(errors["noInstallationId"], i18n.__("noInstallationId"));
         return;
     }
-    let password = req.params.password;
-    let smsCode = req.params.authcode;
+    var password = req.params.password;
+    var smsCode = req.params.authcode;
 
     //   if(lang !== undefined && languages.indexOf(lang) != -1) {
     // 		language = lang;
@@ -139,15 +139,16 @@ exports.resetPassword = function (req, res) {
     }
 
     let renewUser = null;
-    commonFunc.validSmsCode(phoneNumber.toString(), smsCode).then(function (smsInfo) {
+    commonFunc.validSmsCode(phoneNumber, smsCode).then(function (smsInfo) {
         if (!smsInfo || smsInfo === null) {
             ParseLogger.log("warn", i18n.__("invalidSmsCode"), {"req": req});
             res.error(errors["invalidSmsCode"], i18n.__("invalidSmsCode"));
             reject("the SMS code is invalid or expired");
             return;
         } else {
-            let phoneUserQuery = new Parse.Query(User);
-            phoneUserQuery.equalTo("username", phoneNumber.toString());
+            Parse.User.enableUnsafeCurrentUser();
+            var phoneUserQuery = new Parse.Query(Parse.User);
+            phoneUserQuery.equalTo("username", phoneNumber);
             return phoneUserQuery.first({useMasterKey: true});
         }
     }, function (err) {
@@ -160,7 +161,7 @@ exports.resetPassword = function (req, res) {
             res.error(errors["noUser"], i18n.__("noUser"));
             return reject("Failed to find out the  user");
         } else {
-            let prelUser = phUser;
+            var prelUser = phUser;
             prelUser.setPassword(password);
             return prelUser.save(null, {useMasterKey: true});
         }
@@ -181,12 +182,13 @@ exports.resetPassword = function (req, res) {
     }).then(function (regLog) {
         if (!regLog) {
             ParseLogger.log("error", "Failed to save the register log", {"req": req});
-            res.error(errors["internalError"], i18n.__());
+            return res.error(errors["internalError"], i18n.__(internalError));
         } else {
-            res.success({ username: phoneNumber});
+            return res.success({ username: phoneNumber});
         }
     }, function (err) {
         ParseLogger.log("error", err, {"req": req});
+        return res.error(errors["internalError"], i18n.__(error));
     });
 };
 
