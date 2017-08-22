@@ -288,7 +288,6 @@ exports.getSportDataOfDay = function (req, res) {
             res.error(errors["internalError"], i18n.__("internalError"));
             return;
         } else {
-            Parse.Cloud.useMasterKey();
             Parse.User.enableUnsafeCurrentUser();
             var query = new Parse.Query(DeviceInfos);
             query.equalTo('devicename', devicename);

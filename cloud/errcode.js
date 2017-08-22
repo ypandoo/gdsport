@@ -28,5 +28,8 @@ module.exports = {
     "invalidCardNo": 20027,
     "invalidMac": 20028,
     "invalidTimestamp": 20029,
-    "noLocalTime": 20030
+    "noLocalTime": 20030,
+    "noUser":20031,
+    "dbSaveFailed":20032,
+    "noInstallationIdInLog":20033
 };

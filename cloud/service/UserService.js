@@ -75,8 +75,6 @@ exports.signup = function (req, res)  {
     }
 
     let sessionToken = "";
-    Parse.Cloud.useMasterKey();
-
     commonFunc.validSmsCode(phoneNumber, smsCode).then(function (smsCodeRet) {
         // validate if the SMS code is correct and not expired
         if (smsCodeRet === null || !smsCodeRet) {
@@ -109,9 +107,6 @@ exports.signup = function (req, res)  {
 };
 
 
-/**
- * just phone user can reset the password
- */
 exports.resetPassword = function (req, res) {
     commonFunc.setI18n(req, i18n);
     let phoneNumber = req.params.phonenum;
@@ -143,7 +138,6 @@ exports.resetPassword = function (req, res) {
         return res.error(errors["invalidSmsCodeFormat"], i18n.__("invalidSmsCodeFormat"));
     }
 
-    Parse.Cloud.useMasterKey();
     let renewUser = null;
     commonFunc.validSmsCode(phoneNumber.toString(), smsCode).then(function (smsInfo) {
         if (!smsInfo || smsInfo === null) {
@@ -152,7 +146,6 @@ exports.resetPassword = function (req, res) {
             reject("the SMS code is invalid or expired");
             return;
         } else {
-            Parse.Cloud.useMasterKey();
             let phoneUserQuery = new Parse.Query(User);
             phoneUserQuery.equalTo("username", phoneNumber.toString());
             return phoneUserQuery.first({useMasterKey: true});
@@ -164,8 +157,8 @@ exports.resetPassword = function (req, res) {
     }).then(function (phUser) {
         if (!phUser) {
             ParseLogger.log("error", "Failed to find the phone user", {"req": req});
-            res.error(errors["internalError"], i18n.__("internalError"));
-            reject("Failed to find out the phone user");
+            res.error(errors["noUser"], i18n.__("noUser"));
+            return reject("Failed to find out the  user");
         } else {
             let prelUser = phUser;
             prelUser.setPassword(password);
@@ -177,7 +170,7 @@ exports.resetPassword = function (req, res) {
     }).then(function (pnUser) {
         if (!pnUser) {
             ParseLogger.log("error", "Failed to save the parse user", {"req": req});
-            res.error(errors["internalError"], i18n.__("internalError"));
+            res.error(errors["dbSaveFailed"], i18n.__("dbSaveFailed"));
             reject("Save the password failed");
         } else {
             renewUser = pnUser;
@@ -191,7 +184,7 @@ exports.resetPassword = function (req, res) {
     }).then(function (regLog) {
         if (!regLog) {
             ParseLogger.log("error", "Failed to save the register log", {"req": req});
-            res.error(errors["internalError"], i18n.__("internalError"));
+            res.error(errors["noInstallationIdInLog"], i18n.__("noInstallationIdInLog"));
             reject("failed to get the reg log");
             return;
         } else {
@@ -199,11 +192,11 @@ exports.resetPassword = function (req, res) {
         }
     }, function (err) {
         ParseLogger.log("error", err, {"req": req});
-        res.error(errors['internalError'], i18n.__('internalError'));
+        res.error(errors['internalError'], i18n.__(err));
     }).then(function (regLog) {
         if (!regLog) {
             ParseLogger.log("error", "Failed to save the register log", {"req": req});
-            res.error(errors["internalError"], i18n.__("internalError"));
+            res.error(errors["noInstallationIdInLog"], i18n.__("noInstallationIdInLog"));
         } else {
             res.success({ username: phoneNumber});
         }
@@ -218,7 +211,6 @@ exports.resetPassword = function (req, res) {
  */
 exports.signin = function (req, res) {
     commonFunc.setI18n(req,i18n);
-    Parse.Cloud.useMasterKey();
     Parse.User.enableUnsafeCurrentUser();
     let sessionToken = "";
     let retUserName = "";
@@ -238,7 +230,6 @@ exports.signin = function (req, res) {
     phoneNumber = phoneNumber.replace(/\D/g, '');
     let password = req.params.password;
     if (phoneNumber && password) {
-        Parse.Cloud.useMasterKey();
         let phoneUserQuery = new Parse.Query(User);
         phoneUserQuery.equalTo("username", phoneNumber.toString());
         phoneUserQuery.first({useMasterKey: true}).then(function (phoneUser) {
@@ -311,7 +302,6 @@ exports.signin = function (req, res) {
 
 exports.signout = function (req, res) {
     commonFunc.setI18n(req,i18n);
-    Parse.Cloud.useMasterKey();
     Parse.User.enableUnsafeCurrentUser();
     if (req.params.username) {
         let phoneUserQuery = new Parse.Query(User);
@@ -363,7 +353,6 @@ let signUpAllNewPhoneUser = function (req, res, phoneNo, password) {
     let retUserName = "";
     let retObjectId = "";
     let retCreatedAt = "";
-    Parse.Cloud.useMasterKey();
     let user = new Parse.User();
     user.setUsername(phoneNo, {useMasterKey: true});
     user.setPassword(password, {useMasterKey: true});
@@ -444,7 +433,7 @@ exports.updateUserProfile = function (req, res) {
                 }
             }, function (err) {
                 ParseLogger.log("error", err, {"req": req});
-                res.error(errors["internalError"], i18n.__("internalError"));
+                res.error(errors[err], i18n.__(err));
             }).then(function (band) {
                 var profile;
                 if (band.get('profile')) {
@@ -471,7 +460,7 @@ exports.updateUserProfile = function (req, res) {
                 }
             }, function (err) {
                 ParseLogger.log("error", err, {"req": req});
-                res.error(errors["internalError"], i18n.__("internalError"));
+                res.error(errors[err], i18n.__(err));
             }).then(function (profile) {
                 res.success({ 'username': phoneNumber});
             }, function (err) {

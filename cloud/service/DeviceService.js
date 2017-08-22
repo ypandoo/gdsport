@@ -510,7 +510,6 @@ exports.updateDevSettings = function (req, res) {
             ParseLogger.log("warn", "Failed to valid from the register log", {"req": req});
             return res.error(errors["invalidSession"], i18n.__("invalidSession"));
         } else {
-            Parse.Cloud.useMasterKey();
             Parse.User.enableUnsafeCurrentUser();
             var band;
             var query = new Parse.Query(DeviceInfos);

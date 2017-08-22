@@ -136,7 +136,6 @@ Parse.Cloud.define("testI18n", function (req, res) {
      i18n.setLocale(req.params.locale);
      res.success({"msg": i18n.__(req.params.i18nkey)}); */
     var ids = req.params.ids;
-    Parse.Cloud.useMasterKey();
     var smsLogQuery = new Parse.Query(RegisterLogs);
     if (typeof ids !== "undefined" && ids !== null && ids.length > 0) {
         smsLogQuery.notContainedIn("sessionToken", ids);

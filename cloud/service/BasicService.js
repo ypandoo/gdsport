@@ -265,9 +265,8 @@ exports.getSettings = function(req, res) {
         res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
         return;
     }
-    Parse.Cloud.useMasterKey();
-    var configInfosQuery = new Parse.Query(ConfigInfos);
 
+    var configInfosQuery = new Parse.Query(ConfigInfos);
     if (alias.length === 0) {
         configInfosQuery.find({ useMasterKey: true }).then(function(docs) {
             var ret = {};

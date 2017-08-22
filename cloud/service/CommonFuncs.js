@@ -24,8 +24,8 @@ let CommonFuncs = {
     },
     validSmsCode: function(phoneno, code) {
         let promise = new Parse.Promise(function(resolve, reject) {
+            
             let now = new Date();
-            Parse.Cloud.useMasterKey();
             let smsInfosQuery = new Parse.Query(SmsInfos);
             smsInfosQuery.equalTo("phoneNo", phoneno);
             smsInfosQuery.equalTo("data", code);
@@ -38,15 +38,13 @@ let CommonFuncs = {
                 }
 
                 if (!smsInfo) {
-                    reject("invalidSmsCode");
-                    return;
+                    return reject("invalidSmsCode");
                 }
-                resolve(smsInfo);
-                return;
+                return resolve(smsInfo);
+
             }, function(err) {
                 ParseLogger.log("error", err, { "InnerFunc": "InvalidSmsCode" });
-                reject("InvalidSmsCode");
-                return;
+                return reject("InvalidSmsCode");
             });
         });
         return promise;
@@ -70,11 +68,7 @@ let CommonFuncs = {
                 reject("noInstallationId");
                 return;
             }
-            // Parse.Cloud.useMasterKey();
-            // if (typeof req.user.getSessionToken() === "undefined") {
-            //     reject("noSessionToken");
-            //     return;
-            // }
+
             let installationId = req.installationId;
             let registerLogsQuery = new Parse.Query(RegisterLogs);
             registerLogsQuery.equalTo("sessionToken", sessionToken);
@@ -440,7 +434,7 @@ let CommonFuncs = {
                 reject(i18n.__("noInstallationId"));
                 return;
             }
-            Parse.Cloud.useMasterKey();
+
             let installationId = req.installationId.toString();
             let sessionToken = user.getSessionToken();
             let userName = username;
@@ -459,14 +453,14 @@ let CommonFuncs = {
                 return registerLog.save(null, { useMasterKey: true });
             }, function(err) {
                 ParseLogger.log("error", err, { "req": req });
-                reject(i18n.__("internalError"));
+                reject(i18n.__("noInstallationId"));
                 return;
             }).then(function(regLog) {
                 resolve(regLog);
                 return;
             }, function(err) {
                 ParseLogger.log("error", err, { "req": req });
-                reject(i18n.__("internalError"));
+                reject(i18n.__(err));
                 return;
             });
         });
