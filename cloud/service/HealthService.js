@@ -537,7 +537,7 @@ exports.getSleepData = function (req, res) {
                     ParseLogger.log("warn", "Cannot find the deviceInfo", { "req": req });
                     return res.error(errors["noDeviceFound"], i18n.__("noDeviceFound"));
                 }
-                deviceInfoLocal = deviceIfnfo;
+                deviceInfoLocal = deviceInfo;
                 var querySleepData = new Parse.Query(RawSleepData);
                 querySleepData.equalTo('device', deviceInfo);
                 querySleepData.greaterThanOrEqualTo('day', new Date(parseInt(startDate)));
