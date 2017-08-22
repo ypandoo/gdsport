@@ -167,28 +167,13 @@ exports.resetPassword = function (req, res) {
     }, function (err) {
         ParseLogger.log("error", err, {"req": req});
         res.error(errors['internalError'], i18n.__('internalError'));
-    }).then(function (pnUser) {
-        if (!pnUser) {
+    }).then(function (user) {
+        if (!user) {
             ParseLogger.log("error", "Failed to save the parse user", {"req": req});
-            res.error(errors["dbSaveFailed"], i18n.__("dbSaveFailed"));
-            reject("Save the password failed");
+            res.error(errors["noUser"], i18n.__("noUser"));
+            return Parse.Promise.reject("Save the password failed");
         } else {
-            renewUser = pnUser;
-            let regLogQuery = new Parse.Query(RegisterLogs);
-            regLogQuery.equalTo("installationId", req.installationId);
-            return regLogQuery.first({useMasterKey: true});
-        }
-    }, function (err) {
-        ParseLogger.log("error", err, {"req": req});
-        res.error(errors['internalError'], i18n.__('internalError'));
-    }).then(function (regLog) {
-        if (!regLog) {
-            ParseLogger.log("error", "Failed to save the register log", {"req": req});
-            res.error(errors["noInstallationIdInLog"], i18n.__("noInstallationIdInLog"));
-            reject("failed to get the reg log");
-            return;
-        } else {
-            return commonFunc.storeAfterSignup(req, renewUser, regLog.get("username"), password, i18n);
+            return commonFunc.storeAfterSignup(req, user, user.get("username"), password, i18n);
         }
     }, function (err) {
         ParseLogger.log("error", err, {"req": req});
@@ -196,7 +181,7 @@ exports.resetPassword = function (req, res) {
     }).then(function (regLog) {
         if (!regLog) {
             ParseLogger.log("error", "Failed to save the register log", {"req": req});
-            res.error(errors["noInstallationIdInLog"], i18n.__("noInstallationIdInLog"));
+            res.error(errors["internalError"], i18n.__());
         } else {
             res.success({ username: phoneNumber});
         }
