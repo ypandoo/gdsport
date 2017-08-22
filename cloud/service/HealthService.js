@@ -436,27 +436,26 @@ var insertSportData = function (index, sportData, device, req) {
     dayOfData.setHours(0);
     dayOfData.setSeconds(0);
     dayOfData.setMilliseconds(0);
-    querySportData.equalTo('time', sportData.get("time"));
+    querySportData.equalTo('time', timeOfData);
     querySportData.equalTo('device', device);
-    return querySportData.first().then(function (sportDataNew) {
-        if (sportDataNew) {
-            return Parse.Promise.error(0);
+    return querySportData.first().then(function (sportDataQuery) {
+        if (sportDataQuery) {
+            return Parse.Promise.error('Duplicated timestamp');
         }
         return sportData.save();
     }, function (err) {
-        ParseLogger.log("error", 'save sport data failed!', {"req": req});
-        Parse.reject('save sport data failed!');
+        ParseLogger.log("warn", err, {"req": req});
+        return Parse.reject(err);
     }).then(function (obj) {
         var querySportDataOfDay = new Parse.Query(SportDataOfDay);
         querySportDataOfDay.equalTo('day', dayOfData);
         querySportDataOfDay.equalTo('device', device);
         return querySportDataOfDay.first();
     }, function (err) {
-        ParseLogger.log("error", {"sportdata": sportData}, {"req": req});
+        ParseLogger.log("error", err, { "sportdata": sportData });
         return Parse.Promise.reject(err);
     }).then(function (sportDataOfDayNew) {
         if (sportDataOfDayNew) {
-
             sportDataOfDayNew.increment("heat", sportData.get("heat"));
             sportDataOfDayNew.increment("step", sportData.get("step"));
             sportDataOfDayNew.increment("distance", sportData.get("distance"));
@@ -539,7 +538,7 @@ exports.getSleepData = function (req, res) {
                     ParseLogger.log("warn", "Cannot find the deviceInfo", { "req": req });
                     return res.error(errors["noDeviceFound"], i18n.__("noDeviceFound"));
                 }
-                deviceInfoLocal = deviceInfo;
+                deviceInfoLocal = deviceIfnfo;
                 var querySleepData = new Parse.Query(RawSleepData);
                 querySleepData.equalTo('device', deviceInfo);
                 querySleepData.greaterThanOrEqualTo('day', new Date(parseInt(startDate)));
