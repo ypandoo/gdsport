@@ -28,5 +28,11 @@
   "invalidCardNo": "银行卡号格式不正确",
   "invalidMac": "MAC校验不正确",
   "invalidTimestamp": "客户端时间出现误差",
-  "noLocalTime":"没有传入本地时间"
+  "noLocalTime":"没有传入本地时间",
+  "noUserFound": "没有找到用户",
+  "dbSaveFailed": "写入数据库失败",
+  "noInstallationIdInLog": "没有找到相应的installationId",
+  "noPermission": "您没有相应的权限",
+  "noDeviceFound": "找不到相应的设备",
+  "noDeviceSetting": "找不到设备设置"
 }

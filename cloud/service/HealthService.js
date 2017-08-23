@@ -140,7 +140,7 @@ exports.uploadSportData = function (req, res) {
     }).then(function (deviceInfo) {
         if (!deviceInfo) {
             ParseLogger.log("error", err, { "req": req });
-            res.error(errors[err], i18n.__('DeviceNotFound'));
+            res.error(errors[err], i18n.__('noDeviceFound'));
             return reject("");
         }
 
@@ -214,7 +214,7 @@ exports.uploadSleepData = function (req, res) {
     }).then(function (deviceInfo) {
         if (!deviceInfo) {
             ParseLogger.log("error", err, { "req": req });
-            res.error(errors[err], i18n.__('DeviceNotFound'));
+            res.error(errors[err], i18n.__('noDeviceFound'));
             return reject("");
         }
 

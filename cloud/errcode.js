@@ -29,7 +29,10 @@ module.exports = {
     "invalidMac": 20028,
     "invalidTimestamp": 20029,
     "noLocalTime": 20030,
-    "noUser":20031,
+    "noUserFound":20031,
     "dbSaveFailed":20032,
-    "noInstallationIdInLog":20033
+    "noInstallationIdInLog":20033,
+    "noPermission":20034,
+    "noDeviceFound":20035,
+    "noDeviceSetting":20036
 };

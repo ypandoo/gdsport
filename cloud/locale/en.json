@@ -30,7 +30,9 @@
 	"invalidTimestamp": "Client time error",
 	"noLocalTime": "The app local time is missed",
 	"Device exists": "Device exists",
-	"noDeviceFound": "noDeviceFound",
-	"NoPermissionUpdateInstallationInfo": "NoPermissionUpdateInstallationInfo",
-	"noUser": "noUser"
+	"noDeviceFound": "Devcie not found",
+	"noPermission": "No permission to perform operation",
+	"noUserFound": "Specified user not found",
+	"dbSaveFailed": "Save db error",
+	"noDeviceSetting": "Device settings not found"
 }

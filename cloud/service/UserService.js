@@ -171,7 +171,7 @@ exports.resetPassword = function (req, res) {
     }).then(function (user) {
         if (!user) {
             ParseLogger.log("error", "Failed to save the parse user", {"req": req});
-            res.error(errors["noUser"], i18n.__("noUser"));
+            res.error(errors["noUserFound"], i18n.__("noUserFound"));
             return Parse.Promise.reject("Save the password failed");
         } else {
             return commonFunc.storeAfterSignup(req, user, user.get("username"), password, i18n);
@@ -404,7 +404,7 @@ exports.updateUserProfile = function (req, res) {
                 // If not, create a new user.
                 if (!b) {
                     ParseLogger.log("warn", "Failed to find the bind", {"req": req});
-                    return res.error(errors["noBandFound"], i18n.__("noBandFound"));
+                    return res.error(errors["noDeviceFound"], i18n.__("noDeviceFound"));
                 }
                 band = b;
                 //     return b.get('user').fetch();

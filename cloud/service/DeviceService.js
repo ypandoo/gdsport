@@ -520,8 +520,8 @@ exports.updateDevSettings = function (req, res) {
             }).then(function (device) {
                 // If not, create a new user.
                 if (!device) {
-                    ParseLogger.log("error", "Cannot find the band", {"req": req});
-                    return res.error(errors["noBandFound"], i18n.__("noBandFound"));
+                    ParseLogger.log("error", "Cannot find the device", {"req": req});
+                    return res.error(errors["noDeviceFound"], i18n.__("noDeviceFound"));
                 }
 
                 var deviceSetting;
@@ -545,8 +545,8 @@ exports.updateDevSettings = function (req, res) {
                         });
                         return deviceSetting.save(null, {useMasterKey: true});
                 } else {
-                    ParseLogger.log("warn", "No band setting found", {"req": req});
-                    return res.error(errors["noBandSetting"], i18n.__("noBandSetting"));
+                    ParseLogger.log("warn", "No device setting found", {"req": req});
+                    return res.error(errors["noDeviceSetting"], i18n.__("noDeviceSetting"));
                 }
             }, function (err) {
                 ParseLogger.log("error", err, {"req": req});
@@ -586,7 +586,7 @@ exports.getDevSettings = function (req, res) {
                 // If not, create a new user.
                 if (!device) {
                     ParseLogger.log("warn", "Cannot find the band", {"req": req});
-                    return res.error(errors["noBandFound"], i18n.__("noBandFound"));
+                    return res.error(errors["noDeviceFound"], i18n.__("noDeviceFound"));
                 }
                 if (device.get('settings')) {
                     var settings = device.get('settings');
