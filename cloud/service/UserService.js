@@ -119,6 +119,7 @@ exports.resetPassword = function (req, res) {
     }
     var password = req.params.password;
     var smsCode = req.params.authcode;
+    var newSession;
 
     //   if(lang !== undefined && languages.indexOf(lang) != -1) {
     // 		language = lang;
@@ -161,6 +162,7 @@ exports.resetPassword = function (req, res) {
             res.error(errors["noUser"], i18n.__("noUser"));
             return reject("Failed to find out the  user");
         } else {
+            Parse.User.enableUnsafeCurrentUser();
             var prelUser = phUser;
             prelUser.setPassword(password);
             return prelUser.save(null, {useMasterKey: true});
@@ -168,28 +170,46 @@ exports.resetPassword = function (req, res) {
     }, function (err) {
         ParseLogger.log("error", err, {"req": req});
         res.error(errors['internalError'], i18n.__('internalError'));
-    }).then(function (user) {
+    })
+    .then(function (user) {
         if (!user) {
             ParseLogger.log("error", "Failed to save the parse user", {"req": req});
             res.error(errors["noUserFound"], i18n.__("noUserFound"));
             return Parse.Promise.reject("Save the password failed");
         } else {
-            return commonFunc.storeAfterSignup(req, user, user.get("username"), password, i18n);
+            return Parse.User.logIn(phoneNumber, password);
+            //return commonFunc.storeAfterSignup(req, user, user.get("username"), password, i18n);
         }
     }, function (err) {
         ParseLogger.log("error", err, {"req": req});
         res.error(errors['internalError'], i18n.__(err));
-    }).then(function (regLog) {
-        if (!regLog) {
-            ParseLogger.log("error", "Failed to save the register log", {"req": req});
-            return res.error(errors["internalError"], i18n.__(internalError));
-        } else {
-            return res.success({ username: phoneNumber});
+    })
+    .then(function (user) {
+        if (!user) {
+            ParseLogger.log("error", "Failed to save the parse user", { "req": req });
+            res.error(errors["noUserFound"], i18n.__("noUserFound"));
+            return Parse.Promise.reject("Save the password failed");
+        } else 
+        {
+            newSession = user.getSessionToken();
+            return commonFunc.storeAfterSignup(req, user, user.get("username"), password, i18n);
         }
+            
     }, function (err) {
-        ParseLogger.log("error", err, {"req": req});
-        return res.error(errors["internalError"], i18n.__(error));
-    });
+        ParseLogger.log("error", err, { "req": req });
+        res.error(errors['internalError'], i18n.__(err));
+    })
+    .then(function (regLog) {
+        if (!regLog) {
+                ParseLogger.log("error", "Failed to save the register log", {"req": req});
+                return res.error(errors["internalError"], i18n.__(internalError));
+            } else {
+                return res.success({ username: phoneNumber, sessionToken: newSession});
+            }
+        }, function (err) {
+            ParseLogger.log("error", err, {"req": req});
+            return res.error(errors["internalError"], i18n.__(error));
+    })
 };
 
 

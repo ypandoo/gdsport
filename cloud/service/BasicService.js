@@ -174,8 +174,8 @@ exports.updateInstance = function(req, res) {
             var storedDeviceType = singleInstallation.get('pushtype');
             var storedDeviceToken = singleInstallation.get('devicetoken');
             if (storedDeviceToken || storedDeviceType) {
-                ParseLogger.log("warn", "NoPermissionUpdateInstallationInfo", { "req": req });
-                return res.error(errors["internalError"], i18n.__("NoPermissionUpdateInstallationInfo"));
+                ParseLogger.log("warn", "noPermission", { "req": req });
+                return res.error(errors["noPermission"], i18n.__("noPermission"));
             }
 
             singleInstallation.set("pushtype", pushtype);

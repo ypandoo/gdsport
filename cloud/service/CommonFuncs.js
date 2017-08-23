@@ -75,12 +75,12 @@ let CommonFuncs = {
             registerLogsQuery.equalTo("installationId", installationId);
             registerLogsQuery.first({ useMasterKey: true }).then(function(registerLog) {
                 if (!registerLog) {
-                    reject("invalidSession");
+                    return reject("invalidSession");
                 }
-                resolve(registerLog);
+                return resolve(registerLog);
             }, function(err) {
                 ParseLogger.log("error", err, { "InnerFunc": "isSessionLegal" });
-                reject("internalError");
+                return reject("internalError");
             });
         });
         return promise;
@@ -436,6 +436,7 @@ let CommonFuncs = {
             }
 
             let installationId = req.installationId.toString();
+            Parse.User.enableUnsafeCurrentUser();
             let sessionToken = user.getSessionToken();
             let userName = username;
             let passWord = thisInst.doEncrypt(password);

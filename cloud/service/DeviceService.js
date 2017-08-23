@@ -514,7 +514,6 @@ exports.updateDevSettings = function (req, res) {
             var band;
             var query = new Parse.Query(DeviceInfos);
             query.equalTo('devicename', devicename);
-            query.ascending('createdAt');
             return query.first({
                 useMasterKey: true
             }).then(function (device) {
