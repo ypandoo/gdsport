@@ -1,10 +1,5 @@
-/**
- * Created by yuhailong on 06/04/2017.
- */
-
 const i18n = require('i18n');
 const _ = require('lodash');
-
 const cfg = require('../../config/index');
 i18n.configure({
     directory: __dirname + "/../locale"
@@ -12,16 +7,12 @@ i18n.configure({
 const errors = require("../errcode.js");
 const ParseLogger = require('../../parse-server').logger;
 const commonFunc = require("./CommonFuncs");
-
 const SmsLogs = Parse.Object.extend("smslogs");
-//const PhoneUser = Parse.Object.extend("PhoneUser");
 const RegisterLogs = Parse.Object.extend("registerlogs");
 const BandUser = Parse.Object.extend("BandUser");
 const UserProfile = Parse.Object.extend("UserProfile");
 const User = Parse.Object.extend("_User");
 const Session = Parse.Object.extend("_Session");
-
-
 
 
 
@@ -54,8 +45,7 @@ exports.signup = function (req, res)  {
     let retCreatedAt = "";
     if (typeof req.installationId === "undefined" || !req.installationId) {
         ParseLogger.log("warn", i18n.__("noInstallationId"), {"req": req});
-        res.error(errors["noInstallationId"], i18n.__("noInstallationId"));
-        return;
+        return res.error(errors["noInstallationId"], i18n.__("noInstallationId"));
     }
     let password = req.params.password;
     let smsCode = req.params.authcode;
@@ -80,8 +70,7 @@ exports.signup = function (req, res)  {
         if (smsCodeRet === null || !smsCodeRet) {
             ParseLogger.log("warn", i18n.__("invalidSmsCode"), {"req": req});
             res.error(errors["invalidSmsCode"], i18n.__("invalidSmsCode"));
-            reject(errors["invalidSmsCode"], i18n.__("invalidSmsCode"));
-            return;
+            return Parse.Promise.reject(errors["invalidSmsCode"], i18n.__("invalidSmsCode"));
         } else {
             let userQuery = new Parse.Query(Parse.User);
             userQuery.equalTo('username', phoneNumber.toString());
@@ -90,14 +79,13 @@ exports.signup = function (req, res)  {
     }, function (errMsg) {
         ParseLogger.log("error", errMsg, {"req": req});
         res.error(errors[errMsg], i18n.__(errMsg));
-        reject(errMsg);
-        return;
+        return Parse.Promise.reject(errMsg);
     }).then(function (phoneUser) {
         // validate if the phone number has been registered
         if (phoneUser) {
             ParseLogger.log("warn", i18n.__("phoneNbExist"), {"req": req});
             res.error(errors["phoneNbExist"], i18n.__("phoneNbExist"));
-            reject(i18n.__("phoneNbExist"));
+            return Parse.Promise.reject(i18n.__("phoneNbExist"));
         } else {
             // todo create user with phone number directly
             signUpAllNewPhoneUser(req, res, phoneNumber, password);
@@ -144,8 +132,7 @@ exports.resetPassword = function (req, res) {
         if (!smsInfo || smsInfo === null) {
             ParseLogger.log("warn", i18n.__("invalidSmsCode"), {"req": req});
             res.error(errors["invalidSmsCode"], i18n.__("invalidSmsCode"));
-            reject("the SMS code is invalid or expired");
-            return;
+            return Parse.Promise.reject("the SMS code is invalid or expired");
         } else {
             Parse.User.enableUnsafeCurrentUser();
             var phoneUserQuery = new Parse.Query(Parse.User);
@@ -154,8 +141,7 @@ exports.resetPassword = function (req, res) {
         }
     }, function (err) {
         ParseLogger.log("error", err, {"req": req});
-        res.error(errors[err], i18n.__(err));
-        return;
+        return res.error(errors[err], i18n.__(err));
     }).then(function (phUser) {
         if (!phUser) {
             ParseLogger.log("error", "Failed to find the phone user", {"req": req});
@@ -169,7 +155,7 @@ exports.resetPassword = function (req, res) {
         }
     }, function (err) {
         ParseLogger.log("error", err, {"req": req});
-        res.error(errors['internalError'], i18n.__('internalError'));
+        return res.error(errors['internalError'], i18n.__('internalError'));
     })
     .then(function (user) {
         if (!user) {
@@ -182,7 +168,7 @@ exports.resetPassword = function (req, res) {
         }
     }, function (err) {
         ParseLogger.log("error", err, {"req": req});
-        res.error(errors['internalError'], i18n.__(err));
+        return res.error(errors['internalError'], i18n.__(err));
     })
     .then(function (user) {
         if (!user) {
@@ -197,7 +183,7 @@ exports.resetPassword = function (req, res) {
             
     }, function (err) {
         ParseLogger.log("error", err, { "req": req });
-        res.error(errors['internalError'], i18n.__(err));
+        return res.error(errors['internalError'], i18n.__(err));
     })
     .then(function (regLog) {
         if (!regLog) {
@@ -243,22 +229,19 @@ exports.signin = function (req, res) {
             if (!phoneUser) {
                 ParseLogger.log("error", "Failed to find out the user with the password and username", {"req": req});
                 res.error(errors["loginFailed"], i18n.__("loginFailed"));
-                reject("NO this phone number");
-                return;
+                return Parse.Promise.reject("loginFailed");
             } else {
                 return phoneUser;
             }
         }, function (err) {
             ParseLogger.log("error", err, {"req": req});
             res.error(errors["loginFailed"], i18n.__("loginFailed"));
-            reject("NO this phone number");
-            return;
+            return Parse.Promise.reject("loginFailed");
         }).then(function (sUser) {
             if (!sUser) {
                 ParseLogger.log("error", "Faild to find the user by user id", {"req": req});
                 res.error(errors["internalError"], i18n.__("internalError"));
-                reject("Failed to find the user");
-                return;
+                return Parse.Promise.reject("noUserFound");
             } else {
                 let userName = sUser.get("username");
                 return Parse.User.logIn(userName, password);
@@ -266,12 +249,11 @@ exports.signin = function (req, res) {
         }, function (err) {
             ParseLogger.log("error", err, {"req": req});
             res.error(errors["internalError"], i18n.__("internalError"));
-            reject("Failed to find the user");
-            return;
+            return Parse.Promise.reject("Failed to find the user");
         }).then(function (nUser) {
             if (!nUser) {
                 ParseLogger.log("error", "Failed to login the user", {"req": req});
-                res.error(errors["loginFailed"], i18n.__("loginFailed"));
+                return res.error(errors["loginFailed"], i18n.__("loginFailed"));
             } else {
                 sessionToken = nUser.getSessionToken();
                 retUserName = nUser.getUsername();
@@ -283,8 +265,7 @@ exports.signin = function (req, res) {
                 //ret.objectId = retObjectId;
                 //ret.createdAt = retCreatedAt;
                 res.success(ret);
-                commonFunc.storeAfterLogin(req, nUser);
-                return;
+                return commonFunc.storeAfterLogin(req, nUser);
             }
         }, function (err) {
             ParseLogger.log("error", err, {"req": req});
@@ -292,11 +273,6 @@ exports.signin = function (req, res) {
             return;
         });
 
-        // Parse.User.logIn(phoneNumber, secretPasswordToken + req.params.password).then(function (user) {
-        //     res.success(user.getSessionToken());
-        // }, function (err) {
-        //     res.error(err);
-        // });
     } else {
         ParseLogger.log("warn", "Missed username or password", {"req": req});
         res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
@@ -332,13 +308,6 @@ exports.signout = function (req, res) {
             ParseLogger.log("error", err, { "req": req });
             res.error(errors["internalError"], i18n.__("internalError"));
         });
-
-        // Parse.User.logOut().then(function (obj) {
-        //     res.success({})
-        // }, function (err) {
-        //     res.error(err.message);
-        // });
-
     } else {
         ParseLogger.log("warn", "Do not has the req.user", {"req": req});
         res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
@@ -367,8 +336,7 @@ let signUpAllNewPhoneUser = function (req, res, phoneNo, password) {
         if (!newUser) {
             ParseLogger.log("error", "Failed to create user", {"req": req});
             res.error(errors["internalError"], i18n.__("internalError"));
-            reject(i18n.__("internalError"));
-            return;
+            return Parse.Promise.reject(i18n.__("internalError"));
         } else {
             sessionToken = newUser.getSessionToken();
             retUserName = newUser.getUsername();
@@ -379,18 +347,11 @@ let signUpAllNewPhoneUser = function (req, res, phoneNo, password) {
             let ret = {};
             ret.token = sessionToken;
             ret.username = retUserName;
-            //CommonFuncs.jsret.objectId = retObjectId;
-            //ret.createAt = retCreatedAt;
-            res.success(ret);
-
-            /*let phoneUser = new PhoneUser();
-            phoneUser.set("phoneNo", phoneNo);
-            phoneUser.set("user", newUser);
-            return phoneUser.save(null, {useMasterKey: true});*/
+            return res.success(ret);
         }
     }, function (err) {
         ParseLogger.log("error", err, {"req": req});
-        return;
+        return res.error(errors["internalError"], i18n.__("internalError"));
     });
 };
 
@@ -409,8 +370,7 @@ exports.updateUserProfile = function (req, res) {
     commonFunc.isSessionLegal(req, i18n).then(function (regLog) {
         if (!regLog) {
             ParseLogger.log("warn", "Failed to valid from the register log", {"req": req});
-            res.error(errors["invalidSession"], i18n.__("invalidSession"));
-            return;
+            return res.error(errors["invalidSession"], i18n.__("invalidSession"));
         } else {
             Parse.User.enableUnsafeCurrentUser();
             var band;
@@ -427,8 +387,6 @@ exports.updateUserProfile = function (req, res) {
                     return res.error(errors["noDeviceFound"], i18n.__("noDeviceFound"));
                 }
                 band = b;
-                //     return b.get('user').fetch();
-                // }).then(function (user) {
                 var profile;
                 if (band.get('profile')) {
                     profile = band.get('profile');
@@ -490,8 +448,7 @@ exports.getUserProfile =  function (req, res) {
     commonFunc.isSessionLegal(req, i18n).then(function (regLog) {
         if (!regLog) {
             ParseLogger.log("warn", "Failed to valid from the register log", {"req": req});
-            res.error(errors["invalidSession"], i18n.__("invalidSession"));
-            return;
+            return res.error(errors["invalidSession"], i18n.__("invalidSession"));
         } else {
             Parse.User.enableUnsafeCurrentUser();
             var query = null;

@@ -1,6 +1,3 @@
-/**
- * Created by yuhailong on 06/04/2017.
- */
 var i18n = require('i18n');
 var _ = require('lodash');
 i18n.configure({
@@ -8,106 +5,12 @@ i18n.configure({
 });
 var errors = require("../errcode.js");
 const commonFunc = require("./CommonFuncs");
-//var MacTool = require("../tools/macUtil");
-
-var MAX_RATING = 100;
 var RawSportData = Parse.Object.extend("RawSportData");
 var SportDataOfDay = Parse.Object.extend("SportDataOfDay");
 var SportDataOfHour = Parse.Object.extend("SportDataOfHour");
 var RawSleepData = Parse.Object.extend("RawSleepData");
 var DeviceInfos = Parse.Object.extend("deviceinfos");
 const ParseLogger = require('../../parse-server').logger;
-
-//merged interface
-// exports.uploadHealthData = function (req, res) {
-//     commonFunc.setI18n(req, i18n);
-//     var devicename = req.params.devicename;
-//     var sportdata = req.params.sportdata;
-//     var sleepdata = req.params.sleepdata;
-//     var uptime = req.params.uploadtime;
-
-//     // var mac = req.params.mac;
-//     if (!devicename || !uptime || !sportdata) {
-//         ParseLogger.log("warn", "No devicename ,times, sportdata set in the param", {"req": req});
-//         res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
-//         return;
-//     }
-//     commonFunc.isSessionLegal(req, i18n).then(function (regLog) {
-//         if (!regLog) {
-//             ParseLogger.log("warn", "Failed to valid from the register log ", {"req": req});
-//             res.error(errors["invalidSession"], i18n.__("invalidSession"));
-//             Parse.Promise.reject("");
-//             return;
-//         } else {
-//             var deviceQuery = new Parse.Query(DeviceInfos);
-//             deviceQuery.equalTo("devicename", devicename);
-//             return deviceQuery.first();
-//         }
-//     }, function (err) {
-//         ParseLogger.log("error", err, {"req": req});
-//         res.error(errors[err], i18n.__(err));
-//         return reject("");
-//     }).then(function (deviceInfo) {
-//         if(!deviceInfo)
-//         {
-//             ParseLogger.log("error", err, { "req": req });
-//             res.error(errors[err], i18n.__('DeviceNotFound'));
-//             return reject("");
-//         }
-
-//         //Sport data
-//         var count = 0;
-//         var index = 0;
-//         var sports = new Array();
-//         _.forEach(sportdata, function (data) {
-//             var rawSportData = new RawSportData();
-//             rawSportData.set("time", new Date(parseInt(data.time) * 1000));
-//             rawSportData.set("step", parseInt(data.step));
-//             rawSportData.set("heat", parseInt(data.heat));
-//             rawSportData.set("distance", parseInt(data.distance));
-//             rawSportData.set("device", deviceInfo);
-//             sports.push(rawSportData);
-//         });
-//         count = sports.length;
-//         return commonFunc.promiseWhile(
-//                 function () {
-//                     return index < count;
-//                 },
-//                 function () {
-//                     return insertSportData(index, sports[index], deviceInfo, req)
-//                         .then(function (obj) {
-//                                 index++;
-//                                 return Parse.Promise.as(index);
-//                             },
-//                             function (err) {
-//                                 index++;
-//                                 return Parse.Promise.as(index);
-//                                 //res.error(err);
-//                             });
-//                 }).then(function () {
-//                 //deal with sleep data
-//                 if(!sleepdata){
-//                     return res.success({ devicename: devicename });
-//                 }else
-//                 {
-//                     return updateSleepDataL(sleepdata, deviceInfo).then(function(savedSleepData){
-//                         if(savedSleepData)
-//                         {
-//                             return res.success({ devicename: devicename});
-//                         }else{
-//                             ParseLogger.log("error", err, { "req": req });
-//                             return res.error(errors["internalError"], i18n.__("internalError"));
-//                         }
-//                     });
-//                 }
-                
-//             });
-
-//         }, function (err) {
-//             ParseLogger.log("error", err, {"req": req});
-//             res.error(errors["internalError"], i18n.__("internalError"));
-//         });
-// };
 
 //Upload sport data
 exports.uploadSportData = function (req, res) {
@@ -116,7 +19,6 @@ exports.uploadSportData = function (req, res) {
     var sportdata = req.params.sportdata;
     var uptime = req.params.uploadtime;
 
-    // var mac = req.params.mac;
     if (!devicename || !uptime || !sportdata) {
         ParseLogger.log("warn", "No devicename ,times, sportdata set in the param", { "req": req });
         res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
@@ -126,8 +28,7 @@ exports.uploadSportData = function (req, res) {
         if (!regLog) {
             ParseLogger.log("warn", "Failed to valid from the register log ", { "req": req });
             res.error(errors["invalidSession"], i18n.__("invalidSession"));
-            Parse.Promise.reject("");
-            return;
+            return Parse.Promise.reject("invalidSession");
         } else {
             var deviceQuery = new Parse.Query(DeviceInfos);
             deviceQuery.equalTo("devicename", devicename);
@@ -200,8 +101,7 @@ exports.uploadSleepData = function (req, res) {
         if (!regLog) {
             ParseLogger.log("warn", "Failed to valid from the register log ", { "req": req });
             res.error(errors["invalidSession"], i18n.__("invalidSession"));
-            Parse.Promise.reject("");
-            return;
+            return Parse.Promise.reject("invalidSession");
         } else {
             var deviceQuery = new Parse.Query(DeviceInfos);
             deviceQuery.equalTo("devicename", devicename);
@@ -278,15 +178,13 @@ exports.getSportDataOfDay = function (req, res) {
     var deviceInfoLocal;
     if (!devicename || !startDate || !endDate) {
         ParseLogger.log("warn", "Not provide the devicename or start Date or end date", { "req": req });
-        res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
-        return;
+        return res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
     }
 
     commonFunc.isSessionLegal(req, i18n).then(function (regLog) {
         if (!regLog) {
             ParseLogger.log("warn", "Failed to valid from the register log", { "req": req });
-            res.error(errors["internalError"], i18n.__("internalError"));
-            return;
+            return res.error(errors["internalError"], i18n.__("internalError"));
         } else {
             Parse.User.enableUnsafeCurrentUser();
             var query = new Parse.Query(DeviceInfos);
@@ -301,12 +199,6 @@ exports.getSportDataOfDay = function (req, res) {
                 deviceInfoLocal = deviceInfo;
                 var querySportDataOfDay = new Parse.Query(SportDataOfDay);
                 querySportDataOfDay.equalTo('device', deviceInfo);
-                // var message ={
-                //     "startdate": new Date(startDate),
-                //     "enddate": new Date(endDate)
-                // };
-                // ParseLogger.info("Query Sport Data of Day:%j", message, { req: req });
-
                 querySportDataOfDay.greaterThanOrEqualTo('day', new Date(parseInt(startDate)));
                 querySportDataOfDay.lessThanOrEqualTo('day', new Date(parseInt(endDate)));
                 return querySportDataOfDay.count();
@@ -348,8 +240,7 @@ exports.getSportDataOfDay = function (req, res) {
         }
     }, function (err) {
         ParseLogger.log("error", err, { "req": req });
-        res.error(errors[err], i18n.__(err));
-        return;
+        return res.error(errors[err], i18n.__(err));
     });
 };
 
@@ -360,15 +251,13 @@ exports.getSportDataOfHour = function (req, res) {
     var deviceInfoLocal;
     if (!devicename || !date) {
         ParseLogger.log("warn", "Not provide the devicename or date", { "req": req });
-        res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
-        return;
+        return res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
     }
 
     commonFunc.isSessionLegal(req, i18n).then(function (regLog) {
         if (!regLog) {
             ParseLogger.log("warn", "Failed to valid from the register log", { "req": req });
-            res.error(errors["invalidSession"], i18n.__("invalidSession"));
-            return;
+            return res.error(errors["invalidSession"], i18n.__("invalidSession"));
         } else {
             Parse.User.enableUnsafeCurrentUser();
             var query = new Parse.Query(DeviceInfos);
@@ -415,14 +304,12 @@ exports.getSportDataOfHour = function (req, res) {
 
             }, function (err) {
                 ParseLogger.log("error", err, { "req": req });
-                res.error(errors["internalError"], i18n.__("internalError"));
-                return;
+                return res.error(errors["internalError"], i18n.__("internalError"));
             });
         }
     }, function (err) {
         ParseLogger.log("error", err, { "req": req });
-        res.error(errors[err], i18n.__(err));
-        return;
+        return res.error(errors[err], i18n.__(err));
     });
 };
 
@@ -524,8 +411,7 @@ exports.getSleepData = function (req, res) {
     commonFunc.isSessionLegal(req, i18n).then(function (regLog) {
         if (!regLog) {
             ParseLogger.log("warn", "Failed to valid from register log", { "req": req });
-            res.error(errors["invalidSession"], i18n.__("invalidSession"));
-            return;
+            return res.error(errors["invalidSession"], i18n.__("invalidSession"));
         } else {
             Parse.User.enableUnsafeCurrentUser();
             var query = new Parse.Query(DeviceInfos);

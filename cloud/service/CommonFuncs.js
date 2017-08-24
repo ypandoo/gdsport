@@ -54,19 +54,13 @@ let CommonFuncs = {
         this.setI18n(req, i18n);
         let promise = new Parse.Promise(function(resolve, reject) {
 
-            //to do: temporory disable session 
-            //resolve("temp pass");
-            //return;
-
             var sessionToken = req.headers['x-gdsport-session-token'];
             if (typeof sessionToken === "undefined") {
-                reject("noSessionToken");
-                return;
+                return reject("noSessionToken");
             }
 
             if (typeof req.installationId === "undefined") {
-                reject("noInstallationId");
-                return;
+                return reject("noInstallationId");
             }
 
             let installationId = req.installationId;
@@ -74,13 +68,28 @@ let CommonFuncs = {
             registerLogsQuery.equalTo("sessionToken", sessionToken);
             registerLogsQuery.equalTo("installationId", installationId);
             registerLogsQuery.first({ useMasterKey: true }).then(function(registerLog) {
+                //check session and installationId in register log
+                //1. if it exists, just indicates that it is a legal session but it may not the neweast session
                 if (!registerLog) {
                     return reject("invalidSession");
                 }
-                return resolve(registerLog);
+
+                //2. need to check if the session is newest one
+                let username = registerLog.get("username");
+                let registerLogsQuery = new Parse.Query(RegisterLogs);
+                registerLogsQuery.equalTo("username", username);
+                registerLogsQuery.descending('updatedAt');
+                registerLogsQuery.first({ useMasterKey: true }).then(function (newestLog) {
+                    let newestToken = newestLog.get("sessionToken");
+                    if (newestToken == sessionToken)
+                        return resolve(registerLog);
+                    else
+                        return reject("invalidSession");
+                 })
+                
             }, function(err) {
                 ParseLogger.log("error", err, { "InnerFunc": "isSessionLegal" });
-                return reject("internalError");
+                return reject("invalidSession");
             });
         });
         return promise;
@@ -112,8 +121,7 @@ let CommonFuncs = {
                     return smsLogsQuery.count({ useMasterKey: true })
                 }).then(function(cnt) {
                     if (cnt > 0) {
-                        reject("smsCodeFrequent");
-                        return;
+                        return reject("smsCodeFrequent");
                     }
                     let smsLogsQuery = new Parse.Query(SmsLogs);
                     smsLogsQuery.equalTo("phoneNo", phoneNo);
@@ -121,15 +129,13 @@ let CommonFuncs = {
                     return smsLogsQuery.count({ useMasterKey: true });
                 }).then(function(cnt) {
                     if (cnt >= maxCnt) {
-                        reject("smsCodeFrequent");
-                        return;
+                        return reject("smsCodeFrequent");
                     } else {
-                        resolve("ok");
+                        return resolve("ok");
                     }
                 }, function(err) {
                     logger.error(err, { "InnerFunc": "phoneNo" });
-                    reject("internalError");
-                    return;
+                    return reject("internalError");
                 });
         });
         return promise;
@@ -153,8 +159,7 @@ let CommonFuncs = {
                 processorService.sendCode(phoneNo, random, function(err, resp) {
                     if (err) {
                         logger.error(err, { "InnerFunc": "sendSmsCode" });
-                        Parse.reject("remoteSvcError");
-                        return;
+                        return reject("remoteSvcError");
                     }
                     var configInfosQuery = new Parse.Query(ConfigInfos);
                     configInfosQuery.equalTo("alias", "SmsExpiration");
@@ -182,13 +187,10 @@ let CommonFuncs = {
                             smsInfosL.set("expireTime", expireTime);
                             return smsInfosL.save(null, { useMasterKey: true });
                         }).then(function(doc) {
-                            resolve(doc);
-                            return;
+                            return resolve(doc);
                         }, function(err2) {
-                            Parse.reject("remoteSvcError");
                             logger.error(err2, { "InnerFunc": "sendSmsCode" });
-                            return;
-
+                            return reject("remoteSvcError");  
                         });
 
                 });
@@ -266,7 +268,7 @@ let CommonFuncs = {
         if (typeof req.installationId === "undefined") {
 
         }
-        Parse.Cloud.useMasterKey();
+
         let installationId = req.installationId;
         let registerLogsQuery = new Parse.Query(RegisterLogs);
         registerLogsQuery.equalTo("installationId", installationId);
@@ -431,8 +433,7 @@ let CommonFuncs = {
         let promise = new Parse.Promise(function(resolve, reject) {
             if (typeof req.installationId === "undefined") {
                 ParseLogger.log("warn", "Not provide the installationId", { "req": req });
-                reject(i18n.__("noInstallationId"));
-                return;
+                return reject(i18n.__("noInstallationId"));
             }
 
             let installationId = req.installationId.toString();
@@ -456,15 +457,12 @@ let CommonFuncs = {
                 return registerLog.save(null, { useMasterKey: true });
             }, function(err) {
                 ParseLogger.log("error", err, { "req": req });
-                reject(i18n.__("noInstallationId"));
-                return;
+                return reject(i18n.__("noInstallationId"));
             }).then(function(regLog) {
-                resolve(regLog);
-                return;
+                return resolve(regLog);
             }, function(err) {
                 ParseLogger.log("error", err, { "req": req });
-                reject(i18n.__(err));
-                return;
+                return reject(i18n.__(err));
             });
         });
         return promise;
