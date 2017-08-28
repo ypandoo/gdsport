@@ -74,18 +74,21 @@ let CommonFuncs = {
                     return reject("invalidSession");
                 }
 
+                return resolve(registerLog);
+
                 //2. need to check if the session is newest one
-                let username = registerLog.get("username");
-                let registerLogsQuery = new Parse.Query(RegisterLogs);
-                registerLogsQuery.equalTo("username", username);
-                registerLogsQuery.descending('updatedAt');
-                registerLogsQuery.first({ useMasterKey: true }).then(function (newestLog) {
-                    let newestToken = newestLog.get("sessionToken");
-                    if (newestToken == sessionToken)
-                        return resolve(registerLog);
-                    else
-                        return reject("invalidSession");
-                 })
+                // let username = registerLog.get("username");
+                // let registerLogsQuery = new Parse.Query(RegisterLogs);
+                // registerLogsQuery.equalTo("username", username);
+                // registerLogsQuery.descending('updatedAt');
+                // registerLogsQuery.first({ useMasterKey: true }).then(function (newestLog) {
+                //     let newestToken = newestLog.get("sessionToken");
+                //     ParseLogger.log("info", "newestToken");
+                //     if (newestToken == sessionToken)
+                //         return resolve(registerLog);
+                //     else
+                //         return reject("invalidSession");
+                //  })
                 
             }, function(err) {
                 ParseLogger.log("error", err, { "InnerFunc": "isSessionLegal" });
@@ -263,6 +266,7 @@ let CommonFuncs = {
      */
 
     storeAfterLogin: function(req, user) {
+        const that = this;
         let newUserName = null;
         let newSessionToken = null;
         if (typeof req.installationId === "undefined") {
@@ -289,6 +293,10 @@ let CommonFuncs = {
         }).then(function(reglog) {
             newUserName = user.getUsername();
             newSessionToken = user.getSessionToken();
+            
+            //Refresh Token
+            that.refreshToken(newUserName, newSessionToken);
+
             let configQuery = new Parse.Query(ConfigInfos);
             configQuery.equalTo("alias", "ConcurrentUser");
             return configQuery.first({ useMasterKey: true });
@@ -429,6 +437,7 @@ let CommonFuncs = {
 
     storeAfterSignup: function(req, user, username, password, i18n) {
         this.setI18n(req, i18n);
+        const that = this;
         let thisInst = this;
         let promise = new Parse.Promise(function(resolve, reject) {
             if (typeof req.installationId === "undefined") {
@@ -454,6 +463,7 @@ let CommonFuncs = {
                 registerLog.set("user", user);
                 registerLog.set("username", userName);
                 registerLog.set("password", passWord);
+                that.refreshToken(userName, sessionToken);
                 return registerLog.save(null, { useMasterKey: true });
             }, function(err) {
                 ParseLogger.log("error", err, { "req": req });
@@ -496,6 +506,26 @@ let CommonFuncs = {
         decrypted += decipher.final('utf8');
         return decrypted;
     },
+
+    refreshToken: function(username, token)
+    {
+        let registerLogsQuery = new Parse.Query(RegisterLogs);
+        registerLogsQuery.equalTo("username", username);
+        registerLogsQuery.find({ useMasterKey: true }).then(function (newestLogs) {
+            if(newestLogs)
+            {
+                _.forEach(newestLogs, function (oneLog) {
+                    oneLog.set("sessionToken", token);
+                    oneLog.save(null, {
+                        useMasterKey: true
+                    });
+                });
+            }
+            else{
+                ParseLogger.log("error", "no session token update after refresh token!");
+            }     
+        })
+    }
 
 };
 
