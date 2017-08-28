@@ -89,7 +89,7 @@ exports.signup = function (req, res)  {
         } else {
             // todo create user with phone number directly
             signUpAllNewPhoneUser(req, res, phoneNumber, password);
-            //reject("user should be created directly");
+            reject("user should be created directly");
         }
     });
 };
@@ -177,7 +177,7 @@ exports.resetPassword = function (req, res) {
             return Parse.Promise.reject("Save the password failed");
         } else 
         {
-            //newSession = user.getSessionToken();
+            newSession = user.getSessionToken();
             return commonFunc.storeAfterSignup(req, user, user.get("username"), password, i18n);
         }
             
@@ -344,7 +344,6 @@ let signUpAllNewPhoneUser = function (req, res, phoneNo, password) {
             retCreatedAt = newUser.createdAt;
 
             commonFunc.storeAfterLogin(req, user);
-            //commonFunc.refreshToken(retUserName, sessionToken);
             let ret = {};
             ret.token = sessionToken;
             ret.username = retUserName;
