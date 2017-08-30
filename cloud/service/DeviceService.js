@@ -1,17 +1,17 @@
-var i18n = require('i18n');
-var _ = require('lodash');
+const i18n = require('i18n');
+const _ = require('lodash');
 i18n.configure({
     directory: __dirname + "/../locale"
 });
-var errors = require("../errcode.js");
+const errors = require("../errcode.js");
 const ParseLogger = require('../../parse-server').logger;
 const commonFunc = require("./CommonFuncs");
-var ConfigInfos = Parse.Object.extend("configinfos");  
-var BindLogs = Parse.Object.extend("bindlogs");
-var RegisterLogs = Parse.Object.extend("registerlogs");
-var deviceSettings = Parse.Object.extend("devicesettings");
-var UserProfile = Parse.Object.extend("UserProfile");
-var DeviceInfos = Parse.Object.extend("deviceinfos");
+const ConfigInfos = Parse.Object.extend("configinfos");  
+const BindLogs = Parse.Object.extend("bindlogs");
+const RegisterLogs = Parse.Object.extend("registerlogs");
+const deviceSettings = Parse.Object.extend("devicesettings");
+const UserProfile = Parse.Object.extend("UserProfile");
+const DeviceInfos = Parse.Object.extend("deviceinfos");
 
 /***Band Device */
 exports.bindDevice = function (req, res) {
@@ -235,6 +235,7 @@ exports.updateDevSettings = function (req, res) {
                 ParseLogger.log("error", err, {"req": req});
                 return res.error(errors["internalError"], i18n.__("internalError"));
             }).then(function (device) {
+                    
                     if (device.get('settings'))
                     {
                         let deviceSetting = device.get('settings');

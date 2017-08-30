@@ -1,26 +1,31 @@
-var _ = require('lodash');
-var i18n = require('i18n');
+const _ = require('lodash');
+const i18n = require('i18n');
 i18n.configure({
     directory: __dirname + "/../locale"
 });
-var errors = require("../errcode.js");
+const errors = require("../errcode.js");
 const ParseLogger = require('../../parse-server').logger;
 const commonFunc = require("./CommonFuncs");
-var ConfigInfos = Parse.Object.extend("configinfos");
-var AppVersions = Parse.Object.extend("versioninfos");
-var Events = Parse.Object.extend("events");
-var SmsLogs = Parse.Object.extend("smslogs");
-
+const ConfigInfos = Parse.Object.extend("configinfos");
+const AppVersions = Parse.Object.extend("versioninfos");
+const Events = Parse.Object.extend("events");
+const SmsLogs = Parse.Object.extend("smslogs");
 const cfg = require('../../config/index');
-var request = require('request');
+const request = require('request');
 const uuidV4 = require('uuid/v4');
 
 exports.getAppVersions = function(req, res) {
     commonFunc.setI18n(req, i18n);
-    Parse.User.enableUnsafeCurrentUser();
-    var query = new Parse.Query(AppVersions);
+
+    const devicetype = req.params.devicetype;
+    if (!devicetype) {
+        ParseLogger.log("warn", "Not provide enough parameters.Please check", { "req": req });
+        return res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
+    }
+
+    const query = new Parse.Query(AppVersions);
     query.equalTo('current', true);
-    query.equalTo('type', 'android')
+    query.equalTo('type', devicetype);
     query.descending('createdAt');
 
     query.first({

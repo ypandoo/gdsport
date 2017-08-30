@@ -1,6 +1,5 @@
 var express = require("express");
 var router = express.Router();
-var AdminModel = require("../model/admin.model");
 var AdminInfos = Parse.Object.extend("admininfos");
 var PasswordTool = require("../tools/password");
 
@@ -13,8 +12,6 @@ router.post("/doLogin", function (req, res) {
     var password = req.body.password;
     console.log(name + "|" + password);
 
-
-    Parse.Cloud.useMasterKey();
     var adminU = null;
     var adminInfosQuery = new Parse.Query(AdminInfos);
     adminInfosQuery.equalTo("name", name);

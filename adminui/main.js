@@ -4,18 +4,19 @@ var mongoose = require("mongoose");
 var resolve = require("path").resolve;
 var currentPath = resolve(__dirname, "./");
 
-var dbPath = "mongodb://127.0.0.1/CibAdmin";
+//var dbPath = "mongodb://127.0.0.1/gdsportAdmin";
+const cfg = require('../config/index');
 var bodyParser = require("body-parser");
 var session = require("express-session");
 var flash = require("connect-flash");
 var cookieParser = require("cookie-parser");
 var fileUpload = require("express-fileupload");
 
-var conn = mongoose.connect(dbPath).connection;
+var conn = mongoose.connect(cfg.db).connection;
 conn.on("error", console.error.bind(console, "Connection error"));
 
 var sessConf = {
-    secret: 'CIB admin',
+    secret: 'gdsport admin',
     resave: false,
     saveUninitialized: true,
     proxy: true,

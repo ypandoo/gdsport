@@ -1,13 +1,12 @@
-var express = require("express");
-var router = express.Router();
-var EventBus = require('vertx3-eventbus-client');
-var PushService = require('../tools/j_push_service-proxy');
-var MathUtil = require('../tools/mathUtil');
-var PushModel = require('../model/push.model');
-
-var PushInfos = Parse.Object.extend("pushinfos");
-
-var PushSrvAddr = 'http://localhost:20082/eventbus/';
+const express = require("express");
+const router = express.Router();
+const EventBus = require('vertx3-eventbus-client');
+const PushService = require('../tools/j_push_service-proxy');
+const MathUtil = require('../tools/mathUtil');
+const PushModel = require('../model/push.model');
+const PushInfos = Parse.Object.extend("pushinfos");
+const cfg = require('../../config/index');
+const PushSrvAddr = cfg.pushaddr;
 
 router.get("/", function (req, res) {
     res.render("push/index");

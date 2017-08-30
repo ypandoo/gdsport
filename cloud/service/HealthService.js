@@ -1,23 +1,23 @@
-var i18n = require('i18n');
-var _ = require('lodash');
+const i18n = require('i18n');
+const _ = require('lodash');
 i18n.configure({
     directory: __dirname + "/../locale"
 });
-var errors = require("../errcode.js");
+const errors = require("../errcode.js");
 const commonFunc = require("./CommonFuncs");
-var RawSportData = Parse.Object.extend("RawSportData");
-var SportDataOfDay = Parse.Object.extend("SportDataOfDay");
-var SportDataOfHour = Parse.Object.extend("SportDataOfHour");
-var RawSleepData = Parse.Object.extend("RawSleepData");
-var DeviceInfos = Parse.Object.extend("deviceinfos");
+const RawSportData = Parse.Object.extend("RawSportData");
+const SportDataOfDay = Parse.Object.extend("SportDataOfDay");
+const SportDataOfHour = Parse.Object.extend("SportDataOfHour");
+const RawSleepData = Parse.Object.extend("RawSleepData");
+const DeviceInfos = Parse.Object.extend("deviceinfos");
 const ParseLogger = require('../../parse-server').logger;
 
 //Upload sport data
 exports.uploadSportData = function (req, res) {
     commonFunc.setI18n(req, i18n);
-    var devicename = req.params.devicename;
-    var sportdata = req.params.sportdata;
-    var uptime = req.params.uploadtime;
+    const devicename = req.params.devicename;
+    const sportdata = req.params.sportdata;
+    const uptime = req.params.uploadtime;
 
     if (!devicename || !uptime || !sportdata) {
         ParseLogger.log("warn", "No devicename ,times, sportdata set in the param", { "req": req });
@@ -30,7 +30,7 @@ exports.uploadSportData = function (req, res) {
             res.error(errors["invalidSession"], i18n.__("invalidSession"));
             return Parse.Promise.reject("invalidSession");
         } else {
-            var deviceQuery = new Parse.Query(DeviceInfos);
+            const deviceQuery = new Parse.Query(DeviceInfos);
             deviceQuery.equalTo("devicename", devicename);
             return deviceQuery.first();
         }

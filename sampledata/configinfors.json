@@ -99,4 +99,40 @@ db.RawSportData.remove({})
 db.SportDataOfHour.remove({})
 db.SportDataOfDay.remove({})
 
+//admin info
+db.createCollection('admininfos');
+db.getCollection('_SCHEMA').save({
+  "_id": "admininfos",
+  "objectId": "string",
+  "updatedAt": "date",
+  "createdAt": "date",
+  "name": "string",
+  "password": "string",
+  "realName": "string",
+  "useMasterKey": "boolean",
+  "isAvail": "boolean",
+  "group": "string",
+  "features": "array"
+})
+
+db.getCollection('admininfos').save({
+  "_id": "LFoM3hcbBo",
+  "name": "admin",
+  "password": "$2a$10$njvHJLZefojmoFhwV53U..rfEkvT2mkv78Chh8hMPQX4nQ.mGzbQy",
+  "realName": "超级管理员",
+  "useMasterKey": true,
+  "_created_at": ISODate("2016-12-14T09:33:56.915Z"),
+  "_updated_at": ISODate("2017-07-20T04:42:06.778Z"),
+  "isAvail": true,
+  "group": "admin",
+  "features": [
+    "config",
+    "version",
+    "activity",
+    "push",
+    "factory",
+    "guide",
+    "user"
+  ]
+})
 

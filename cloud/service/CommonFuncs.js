@@ -1,18 +1,17 @@
-let SmsInfos = Parse.Object.extend("smsinfos");
-let RegisterLogs = Parse.Object.extend("registerlogs");
-let ConfigInfos = Parse.Object.extend("configinfos");
-let SmsLogs = Parse.Object.extend("smslogs");
-let MathUtil = require("../tools/mathUtil");
-let EventBus = require("vertx3-eventbus-client");
-let smsEventBusAddr = "http://localhost:20081/eventbus/";
-let SmsService = require("../tools/dahansms_service-proxy");
-let _ = require("lodash");
-let PushService = require('../tools/j_push_service-proxy');
+const SmsInfos = Parse.Object.extend("smsinfos");
+const RegisterLogs = Parse.Object.extend("registerlogs");
+const ConfigInfos = Parse.Object.extend("configinfos");
+const SmsLogs = Parse.Object.extend("smslogs");
+const MathUtil = require("../tools/mathUtil");
+const EventBus = require("vertx3-eventbus-client");
+const smsEventBusAddr = "http://localhost:20081/eventbus/";
+const SmsService = require("../tools/dahansms_service-proxy");
+const _ = require("lodash");
+const PushService = require('../tools/j_push_service-proxy');
 const ParseLogger = require('../../parse-server').logger;
-var Crypto = require("crypto");
-var EncKey = '1122334455667788';
-var EncIV = '8877665544332211';
-
+const Crypto = require("crypto");
+const EncKey = '1122334455667788';
+const EncIV = '8877665544332211';
 
 let CommonFuncs = {
     setI18n: function(req, i18n) {
@@ -342,7 +341,6 @@ let CommonFuncs = {
      * @param installationIds StringArray
      */
     sendLogoutPushMsg: function(installationIds) {
-        Parse.Cloud.useMasterKey();
         let sendData = {};
         sendData.tags = [];
         sendData.tagsAnd = [];
