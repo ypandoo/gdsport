@@ -15,15 +15,15 @@ const EncIV = '8877665544332211';
 
 let CommonFuncs = {
     setI18n: function(req, i18n) {
-        if (typeof req.params !== "undefined" && typeof req.params.locale !== "undefined") {
-            i18n.setLocale(req.params.locale);
+        if (typeof req.headers['x-gdsport-locale'] !== "undefined") {
+            i18n.setLocale(req.headers['x-gdsport-locale']);
         } else {
             i18n.setLocale("en");
         }
     },
     validSmsCode: function(phoneno, code) {
         let promise = new Parse.Promise(function(resolve, reject) {
-            
+
             let now = new Date();
             let smsInfosQuery = new Parse.Query(SmsInfos);
             smsInfosQuery.equalTo("phoneNo", phoneno);
@@ -88,7 +88,7 @@ let CommonFuncs = {
                 //     else
                 //         return reject("invalidSession");
                 //  })
-                
+
             }, function(err) {
                 ParseLogger.log("error", err, { "InnerFunc": "isSessionLegal" });
                 return reject("invalidSession");
@@ -192,7 +192,7 @@ let CommonFuncs = {
                             return resolve(doc);
                         }, function(err2) {
                             logger.error(err2, { "InnerFunc": "sendSmsCode" });
-                            return reject("remoteSvcError");  
+                            return reject("remoteSvcError");
                         });
 
                 });
@@ -292,7 +292,7 @@ let CommonFuncs = {
         }).then(function(reglog) {
             newUserName = user.getUsername();
             newSessionToken = user.getSessionToken();
-            
+
             //Refresh Token
             that.refreshToken(newUserName, newSessionToken);
 
@@ -449,7 +449,7 @@ let CommonFuncs = {
             let userName = username;
             let passWord = thisInst.doEncrypt(password);
             let registerLogsQuery = new Parse.Query(RegisterLogs);
- 
+
             registerLogsQuery.equalTo("installationId", installationId);
             registerLogsQuery.first({ useMasterKey: true }).then(function(registerLog) {
                 if (!registerLog) {
@@ -505,23 +505,20 @@ let CommonFuncs = {
         return decrypted;
     },
 
-    refreshToken: function(username, token)
-    {
+    refreshToken: function(username, token) {
         let registerLogsQuery = new Parse.Query(RegisterLogs);
         registerLogsQuery.equalTo("username", username);
-        registerLogsQuery.find({ useMasterKey: true }).then(function (newestLogs) {
-            if(newestLogs)
-            {
-                _.forEach(newestLogs, function (oneLog) {
+        registerLogsQuery.find({ useMasterKey: true }).then(function(newestLogs) {
+            if (newestLogs) {
+                _.forEach(newestLogs, function(oneLog) {
                     oneLog.set("sessionToken", token);
                     oneLog.save(null, {
                         useMasterKey: true
                     });
                 });
-            }
-            else{
+            } else {
                 ParseLogger.log("error", "no session token update after refresh token!");
-            }     
+            }
         })
     }
 
