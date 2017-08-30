@@ -9,6 +9,7 @@ var local = {
 		"cloud" : {
 
 		},
+		"pushaddr": "http://192.168.1.37:20082",
 		"app_id": "appworld-gdsport",
 		"master_key": "XXXXXX",
 		"mount_path" : "/parse",

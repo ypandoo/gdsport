@@ -9,7 +9,7 @@ var local = {
 		"cloud" : {
 
 		},
-		"eventbus": "http://127.0.0.1:20081",
+		"pushaddr": "http://127.0.0.1:20081",
 		"app_id": "appworld-gdsport",
 		"master_key": "XXXXXX",
 		"mount_path" : "/parse",
