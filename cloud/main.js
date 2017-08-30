@@ -15,10 +15,6 @@ i18n.configure({
     directory: __dirname + "/locale"
 });
 
-var externalGatewayAddr = "http://localhost:20081/eventbus/";
-var EventBus = require('vertx3-eventbus-client');
-
-
 // var language = "zh";
 // var languages = ["en", "es", "ja", "kr", "zh"];
 

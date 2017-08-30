@@ -4,7 +4,7 @@ const ConfigInfos = Parse.Object.extend("configinfos");
 const SmsLogs = Parse.Object.extend("smslogs");
 const MathUtil = require("../tools/mathUtil");
 const EventBus = require("vertx3-eventbus-client");
-const smsEventBusAddr = "http://localhost:20081/eventbus/";
+const cfg = require("../../config/index");
 const SmsService = require("../tools/dahansms_service-proxy");
 const _ = require("lodash");
 const PushService = require('../tools/j_push_service-proxy');
@@ -152,7 +152,7 @@ let CommonFuncs = {
         var promise = new Parse.Promise(function(resolve, reject) {
             var random = MathUtil.getRandom(9999, 1000).toString();
             var phoneNo = phoneno.toString();
-            var eb = new EventBus(smsEventBusAddr);
+            var eb = new EventBus(cfg.eventbus);
             var smsExpiration = 300;
             var expireTime, now;
 
