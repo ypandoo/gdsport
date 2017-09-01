@@ -60,20 +60,39 @@ exports.uploadEvents = function(req, res) {
     const dimensions = req.params.dimensions;
     const event = req.params.event;
     const at = req.params.at;
+    const cksession = req.params.cksession;
 
-    if (!dimensions || !event || !at) {
+    if (!dimensions || !event || !at || !(typeof(dimensions) == "object")) {
         ParseLogger.log("warn", "Not provide enough parameters.Please check", { "req": req });
         return res.error(errors["invalidParameter"], i18n.__("invalidParameter"));
     }
 
-    var events = new Events();
+    //check session when needed
+    if (cksession && parseInt(cksession) == 1) {
+        commonFunc.isSessionLegal(req, i18n).then(function(regLog) {
+            if (!regLog) {
+                ParseLogger.log("warn", "Failed to valid from the register log", { "req": req });
+                return res.error(errors["invalidSession"], i18n.__("invalidSession"));
+            } else {
+                return saveEvent(at, event, dimensions, res);
+            }
+        }, function(err) {
+            ParseLogger.log("warn", "Failed to valid from the register log", { "req": req });
+            return res.error(errors["invalidSession"], i18n.__("invalidSession"));
+        });
+    } else {
+        return saveEvent(at, event, dimensions, res);
+    }
+};
+
+function saveEvent(at, event, dimensions, res) {
+    const events = new Events();
     events.set("at", new Date(at));
     events.set("event", event);
     events.set("dimensions", dimensions);
     events.save().then(function(saved) {
             if (saved) {
-                var ret = {};
-                return res.success(ret);
+                return res.success({});
             } else {
                 ParseLogger.log("warn", "internalError", { "req": req });
                 return res.error(errors["internalError"], i18n.__("internalError"));
@@ -83,8 +102,7 @@ exports.uploadEvents = function(req, res) {
             ParseLogger.log("error", error, { "req": req });
             return res.error(errors["internalError"], i18n.__("internalError"));
         })
-
-};
+}
 
 
 exports.instantiateApp = function(req, res) {

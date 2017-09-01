@@ -16,15 +16,14 @@
 
  */
 
-var ParseUtilFile = function () {
-};
+var ParseUtilFile = function() {};
 
 ParseUtilFile.prototype.callback = null;
 ParseUtilFile.prototype.cnt = 0;
 ParseUtilFile.prototype.srcList = [];
 ParseUtilFile.prototype.retList = [];
 
-ParseUtilFile.prototype.handle = function (srcs, cb) {
+ParseUtilFile.prototype.handle = function(srcs, cb) {
     this.srcList = srcs;
     this.callback = cb;
     this.cnt = 0;
@@ -33,12 +32,12 @@ ParseUtilFile.prototype.handle = function (srcs, cb) {
     this.handleSingle();
 };
 
-ParseUtilFile.prototype.handleSingle = function () {
+ParseUtilFile.prototype.handleSingle = function() {
     var myInst = this;
     var mokeName = "tmp_" + myInst.getRandom(9999, 1);
     Parse.Cloud.useMasterKey();
-    var parseFile = new Parse.File(mokeName, {base64: myInst.srcList[myInst.cnt]});
-    parseFile.save({useMasterKey: true}).then(function (obj) {
+    var parseFile = new Parse.File(mokeName, { base64: myInst.srcList[myInst.cnt] });
+    parseFile.save({ useMasterKey: true }).then(function(obj) {
         //console.log("File Url:" + parseFile.url());
         myInst.retList.push(parseFile.url());
         myInst.cnt++;
@@ -48,7 +47,7 @@ ParseUtilFile.prototype.handleSingle = function () {
             return;
         }
         myInst.handleSingle();
-    }, function (err) {
+    }, function(err) {
         myInst.callback(null);
         console.log(err);
     });
@@ -56,6 +55,6 @@ ParseUtilFile.prototype.handleSingle = function () {
 };
 
 
-ParseUtilFile.prototype.getRandom = function (max, min) {
+ParseUtilFile.prototype.getRandom = function(max, min) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }

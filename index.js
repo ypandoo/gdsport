@@ -1,22 +1,14 @@
-// Example express application adding the parse-server module to expose Parse
-// compatible API routes.
-
 const express = require('express');
 const ParseServer = require('./parse-server').ParseServer;
 const logger = require('./parse-server').logger;
 const ParseDashboard = require('./parse-dashboard');
-
 const path = require('path');
-var AppAnalyticsAdapter = require("./adapter/AppAnalyticsAdapter");
-
-var RebootCntTool = require("./gd-spec/InitRebootCnt");
-
+const AppAnalyticsAdapter = require("./adapter/AppAnalyticsAdapter");
+const RebootCntTool = require("./gd-spec/InitRebootCnt");
 const cfg = require('./config/index');
 
-
 var rebootCnt = 0;
-
-RebootCntTool.initRebootCnt("" + "RebootCounter.json", function (cnt) {
+RebootCntTool.initRebootCnt("" + "RebootCounter.json", function(cnt) {
     rebootCnt = cnt;
 });
 
@@ -24,32 +16,30 @@ RebootCntTool.initRebootCnt("" + "RebootCounter.json", function (cnt) {
 // Client-keys like the javascript key or the .NET key are not necessary with parse-server
 // If you wish you require them, you can set them as options in the initialization above:
 // javascriptKey, restAPIKey, dotNetKey, clientKey
-
-var app = express();
-
-app.use("/", fakeParseHeader);
+const app = express();
+app.use("/", checkHeader);
 app.use("/", addUniqId);
 
-var api = new ParseServer({
-        databaseURI: cfg.db,
-        cloud: "./cloud/main.js",
-        appId: cfg.app_id,
-        masterKey: cfg.master_key,
-        serverURL: cfg.server_url, // Don't forget to change to https if needed
-      
-        logsFolder: "./logs",
-        analyticsAdapter: new AppAnalyticsAdapter(),
-        verbose: true
-    })
-    ;
+//parse server
+const api = new ParseServer({
+    databaseURI: cfg.db,
+    cloud: "./cloud/main.js",
+    appId: cfg.app_id,
+    masterKey: cfg.master_key,
+    serverURL: cfg.server_url, // Don't forget to change to https if needed
 
-var dashboard = new ParseDashboard({
+    logsFolder: "./logs",
+    analyticsAdapter: new AppAnalyticsAdapter(),
+    verbose: true
+});
+
+const dashboard = new ParseDashboard({
     "apps": [{
-        "serverURL": cfg.server_url,
-        appId: cfg.app_id,
-        masterKey: cfg.master_key,
-        "appName": "Appworld"
-    }
+            "serverURL": cfg.server_url,
+            appId: cfg.app_id,
+            masterKey: cfg.master_key,
+            "appName": "Appworld"
+        }
 
     ],
     "users": cfg.dashboard_users
@@ -58,7 +48,7 @@ var dashboard = new ParseDashboard({
 
 var ReqCounter = {
     counter: 0,
-    get: function () {
+    get: function() {
         if (this.counter >= 99999999) {
             this.counter = 0;
         }
@@ -82,12 +72,12 @@ function addUniqId(req, res, next) {
     next();
 };
 
-function fakeParseHeader(req, res, next) {
-
-    req.headers["x-parse-application-id"] = req.headers['x-gdsport-application-id'];
-    req.headers["x-parse-client-key"] = req.headers['x-gdsport-api-key'];;
-    req.headers["x-parse-installation-id"] = req.headers['x-gdsport-installation-id'];
-
+function checkHeader(req, res, next) {
+    if (req.headers['x-gdsport-application-id'] == cfg.gdsport_keys.applicationId && req.headers['x-gdsport-api-key'] == cfg.gdsport_keys.apiKey) {
+        req.headers["x-parse-application-id"] = cfg.parse_keys.applicationId;
+        req.headers["x-parse-client-key"] = cfg.parse_keys.clientKey;
+        req.headers["x-parse-installation-id"] = req.headers['x-gdsport-installation-id'];
+    }
     next();
 };
 
@@ -96,15 +86,15 @@ function fakeParseHeader(req, res, next) {
 // app.use('/public', express.static(path.join(__dirname, '/public')));
 
 // Serve the Parse API on the /parse URL prefix
-if(!cfg.disable_apiservice){
+if (!cfg.disable_apiservice) {
     app.use(cfg.mount_path, api);
 }
-if(!cfg.disable_dashboard){
+if (!cfg.disable_dashboard) {
     app.use('/dashboard', dashboard);
 }
 
 //TODO tianxin 2017-08-01   remove this ,and change adminui auth settings
-app.all("*", function (req, res, next) {
+app.all("*", function(req, res, next) {
     req.cibParse = {};
     req.cibParse.appId = cfg.app_id;
     req.cibParse.masterKey = cfg.master_key;
@@ -112,17 +102,15 @@ app.all("*", function (req, res, next) {
     next();
 });
 
-if(!cfg.disable_adminui){
+if (!cfg.disable_adminui) {
     app.use("/adminui", require("./adminui/main"));
 }
-app.get('/', function (req, res) {
+app.get('/', function(req, res) {
     res.sendStatus(404);
 });
+
+//Listen
 var httpServer = require('http').createServer(app);
-
-
-httpServer.listen(cfg.port, function () {
+httpServer.listen(cfg.port, function() {
     logger.info('appworld-gdsport v2 running on port ' + cfg.port + '.');
 });
-
-
